@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Inovar Overhaul
+// @name         Inovar Overhaul - Server
 // @version      0.1
-// @description  Trocar link do Whatsapp para link direto
+// @description  Numero selesionável no Whatsap, erevisão do sistema Inovar
 // @author       Luís Henrique de Almeida
 // @match        https://web.whatsapp.com/*
 // @match        https://api.whatsapp.com/send/*
@@ -216,10 +216,12 @@ setInterval(() => {
 
                             <div id="driveDisplayContainer" style="${window.config_ActiveDriveContainerBlur?"":"filter: blur(0px)"}">
                                 <!-- Não funcionam por causa da origem diferente do iframe 😥, mas ficou tão legal que vou deixar ai de enfeite -->
-                                <div class="contentDisplayHistoryButtons">
-                                    <p class="clickableButton" title="Não funcionam por causa da origem diferente do iframe 😥, mas ficou tão legal que vou deixar ai de enfeite" onclick="document.querySelector('.contentDisplayIframe').contentWindow.history.back()">←</p>
-                                    <p class="clickableButton" title="Não funcionam por causa da origem diferente do iframe 😥, mas ficou tão legal que vou deixar ai de enfeite" onclick="document.querySelector('.contentDisplayIframe').contentWindow.history.forward()">→</p>
-                                    <p class="clickableButton" title="Não funcionam por causa da origem diferente do iframe 😥, mas ficou tão legal que vou deixar ai de enfeite" onclick="document.querySelector('.contentDisplayIframe').contentWindow.location.reload(true)"><img src="https://cdn-icons-png.flaticon.com/512/126/126502.png"></p>
+                                <div class="contentDisplayHistoryButtons" title="Não funcionam por causa da origem diferente do iframe 😥, mas ficou tão legal que vou deixar ai de enfeite">
+                                    <p class="clickableButton" onclick="document.querySelector('.contentDisplayIframe').contentWindow.history.back()">←</p>
+                                    <p class="clickableButton" onclick="document.querySelector('.contentDisplayIframe').contentWindow.history.forward()">→</p>
+                                    <p class="clickableButton" onclick="document.querySelector('.contentDisplayIframe').contentWindow.location.reload(true)">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/126/126502.png">
+                                    </p>
                                 </div>
                                 <iframe class="contentDisplayIframe" src="https://drive.google.com/drive/u/0/starred"></iframe>
                             </div>
@@ -516,6 +518,11 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
                     <h4>Ativar Blur da aba do Google Drive<br>
                     (o Blur é apenas visual e ativado pode causar lentidão)</h4>
                     <p class="clickableButton" onclick="window.setDriveContainerBlur(this)">${window.config_ActiveDriveContainerBlur? "✔": "✖"}</p>
+                    <hr>
+
+                    <h4>Atualizar Cliente<br>
+                    (ao atualiza é nescessário reiniciar o sistema)</h4>
+                    <p class="clickableButton" onclick="window.open('https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/main/client.user.js')">Update</p>
                 `;
                 // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
             }

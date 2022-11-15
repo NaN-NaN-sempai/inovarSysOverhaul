@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Inovar Overhaul loaded from github
+// @name         Inovar Overhaul - Client
 // @version      0.1
-// @description  Trocar link do Whatsapp para link direto
+// @description  Carrega o codigo do GitHub
 // @author       Luís Henrique de Almeida
 // @match        https://web.whatsapp.com/*
 // @match        https://api.whatsapp.com/send/*
