@@ -205,7 +205,7 @@ setInterval(() => {
                                 border-radius: 50px;
                                 width: 20px;
                             }
-                            .contentDisplayHistoryButtons .clickableButton:nth-child(3) img {
+                            .insertHtmlIcon {
                                 height: 13px;
                             }
                         </style>
@@ -220,7 +220,7 @@ setInterval(() => {
                                     <p class="clickableButton" onclick="document.querySelector('.contentDisplayIframe').contentWindow.history.back()">←</p>
                                     <p class="clickableButton" onclick="document.querySelector('.contentDisplayIframe').contentWindow.history.forward()">→</p>
                                     <p class="clickableButton" onclick="document.querySelector('.contentDisplayIframe').contentWindow.location.reload(true)">
-                                        <img src="https://cdn-icons-png.flaticon.com/512/126/126502.png">
+                                        <img class="insertHtmlIcon" src="https://cdn-icons-png.flaticon.com/512/126/126502.png">
                                     </p>
                                 </div>
                                 <iframe class="contentDisplayIframe" src="https://drive.google.com/drive/u/0/starred"></iframe>
@@ -494,7 +494,9 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
             var showContent = "";
 
             if(checkContent == "Dados do pedido"){
-                showContent = window.orderDataHolder == undefined? "Nem um pedido selecionado.<br>Pressione o botão direito no link de contato de algum pedido para ver os dados do pedido.": window.orderDataHolder;
+                showContent = window.orderDataHolder == undefined?
+                                  "Nem um pedido selecionado.<br>Pressione o botão direito no link de contato de algum pedido para ver os dados do pedido.":
+                                  window.orderDataHolder;
 
             } else {
                 
@@ -522,7 +524,9 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
 
                     <h4>Atualizar Cliente<br>
                     (ao atualiza é nescessário reiniciar o sistema)</h4>
-                    <p class="clickableButton" onclick="window.open('https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/main/client.user.js')">Update</p>
+                    <p class="clickableButton" onclick="window.open('https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/main/client.user.js')">
+                        <img class="insertHtmlIcon" src="https://cdn-icons-png.flaticon.com/512/45/45162.png">
+                    </p>
                 `;
                 // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
             }
