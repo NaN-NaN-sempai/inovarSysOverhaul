@@ -163,7 +163,7 @@ setInterval(() => {
                         }
                         .contentDisplayIframe {
                             width: 100%;
-                            height: 85vh;
+                            height: 100%;
                             border:0;
                             padding: 0;
                             border-radius: 10px;
