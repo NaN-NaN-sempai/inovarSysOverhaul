@@ -137,13 +137,12 @@ setInterval(() => {
                                 z-index: 1;
                                 white-space: nowrap;
                                 background: white;
-                                border-radius: 20px;
-                                border: 1px black solid;
                                 padding: 0;
-                                overflow: overlay;
                                 opacity: 0;
                                 transition: width 1s, height 1s, opacity .5s;
                                 pointer-events: none;
+                                background: transparent !important;
+                                border: 0 !important;
                             }
                             #driveDisplayContainer.show {
                                 width: 60vw;
@@ -164,21 +163,50 @@ setInterval(() => {
                                 height: 30px;
                                 padding-top: 3px;
                             }
-                            #driveDisplayContainer::-webkit-scrollbar-thumb {
-                                background-color: black;
-                                border: 4px solid transparent;
-                                border-radius: 8px;
-                                background-clip: padding-box;
-                            }
-                            #driveDisplayContainer::-webkit-scrollbar {
-                                width: 16px;
-                            }
                             .contentDisplayIframe {
                                 width: 100%;
                                 height: 100%;
                                 border:0;
                                 padding: 0;
-                                border-radius: 10px;
+                                border-radius: 20px;
+                                background: transparent !important;
+                                border: 1px black solid;
+                            }
+                            .contentDisplayHistoryButtons {
+                                display: flex;
+                                background: black;
+                                color: white;
+                                flex-direction: row;
+                                flex-wrap: nowrap;
+                                align-content: stretch;
+                                align-items: flex-start;
+                                justify-content: flex-start;
+                                position: absolute;
+                                top: -25px;
+                                left: 0;
+                                background: transparent !important;
+                            }
+                            .contentDisplayHistoryButtons .clickableButton {
+                                width: 30px;
+                                border-radius: 0;
+                                text-align: center;
+                                outline: 1px black solid;
+                                border: 0;
+                                cursor: pointer;
+                                user-select: none;
+                            }
+                            .contentDisplayHistoryButtons .clickableButton:nth-child(1) {
+                                border-radius: 50px 0 0 50px;
+                            }
+                            .contentDisplayHistoryButtons .clickableButton:nth-child(2) {
+                                border-radius: 0 50px 50px 0;
+                            }
+                            .contentDisplayHistoryButtons .clickableButton:nth-child(3) {
+                                border-radius: 50px;
+                                width: 20px;
+                            }
+                            .contentDisplayHistoryButtons .clickableButton:nth-child(3) img {
+                                height: 13px;
                             }
                         </style>
                         <div class="insertHtmlMainContainer">
@@ -187,6 +215,12 @@ setInterval(() => {
                             </div>
 
                             <div id="driveDisplayContainer" style="${window.config_ActiveDriveContainerBlur?"":"filter: blur(0px)"}">
+                                <!-- Não funcionam por causa da origem diferente do iframe 😥, mas ficou tão legal que vou deixar ai de enfeite -->
+                                <div class="contentDisplayHistoryButtons">
+                                    <p class="clickableButton" title="Não funcionam por causa da origem diferente do iframe 😥, mas ficou tão legal que vou deixar ai de enfeite" onclick="document.querySelector('.contentDisplayIframe').contentWindow.history.back()">←</p>
+                                    <p class="clickableButton" title="Não funcionam por causa da origem diferente do iframe 😥, mas ficou tão legal que vou deixar ai de enfeite" onclick="document.querySelector('.contentDisplayIframe').contentWindow.history.forward()">→</p>
+                                    <p class="clickableButton" title="Não funcionam por causa da origem diferente do iframe 😥, mas ficou tão legal que vou deixar ai de enfeite" onclick="document.querySelector('.contentDisplayIframe').contentWindow.location.reload(true)"><img src="https://cdn-icons-png.flaticon.com/512/126/126502.png"></p>
+                                </div>
                                 <iframe class="contentDisplayIframe" src="https://drive.google.com/drive/u/0/starred"></iframe>
                             </div>
                             
