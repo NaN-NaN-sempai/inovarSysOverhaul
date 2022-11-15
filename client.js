@@ -28,13 +28,16 @@
     var loadLocal = false;
     /* loadLocal faz o script carregar localmente (usando servidor http, no caso eu usei o live server mesmo) ao invez do github, serve para editar o script */
 
-    var localScriptLocation = "http://localhost:5500/index.js";
+    var localScriptLocation = "http://localhost:5500/server.js";
+    var gitHubLocation = "https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/main/server.js";
 
     var fetchLocation = loadLocal?
                             localScriptLocation:
-                            "https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/main/index.js";
+                            gitHubLocation;
 
     var getPromisse = await fetch(fetchLocation);
     var getScript = await getPromisse.text();
+
+    /* eslint no-eval: 0 */
     eval(getScript);
 })();
