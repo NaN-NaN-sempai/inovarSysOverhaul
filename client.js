@@ -25,7 +25,7 @@
 */
 
 (async () => {
-    var loadLocal = true;
+    var loadLocal = false;
     /* loadLocal faz o script carregar localmente (usando servidor http, no caso eu usei o live server mesmo) ao invez do github, serve para editar o script */
 
     var localScriptLocation = "http://localhost:5500/index.js";
