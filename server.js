@@ -131,7 +131,7 @@ setInterval(() => {
                             z-index: 1;
                             white-space: nowrap;
                             background: white;
-                            border-radius: 10px;
+                            border-radius: 20px;
                             border: 1px black solid;
                             padding: 0;
                             overflow: overlay;
@@ -147,6 +147,10 @@ setInterval(() => {
                         }
                         #driveDisplayContainer.show:hover {
                             opacity: 1;
+                        }
+                        .driveIcon {
+                            height: 30px;
+                            padding-top: 3px;
                         }
                         #driveDisplayContainer::-webkit-scrollbar-thumb {
                             background-color: black;
@@ -176,7 +180,9 @@ setInterval(() => {
                         
                         <div class="sideButtonsContainer">
                             <p class="clickableButton" onclick="window.openContentInDisplay(this.innerHTML)">Dados do pedido</p>
-                            <p class="clickableButton" onclick="document.querySelector('#driveDisplayContainer').classList.toggle('show'); this.style.opacity=''">Abrir Drive</p>
+                            <p class="clickableButton" onclick="document.querySelector('#driveDisplayContainer').classList.toggle('show'); this.style.opacity=''">
+                                <img class="driveIcon" src="https://cdn-icons-png.flaticon.com/512/5968/5968523.png">
+                            </p>
                             <p class="clickableButton" onclick="apex.submit()">Recarregar lista</p>
                             <p class="clickableButton" onclick="window.openContentInDisplay(this.innerHTML)">⚙</p>
                         </div>
