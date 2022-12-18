@@ -24,20 +24,46 @@
     Faz os sites aceitarem iframe de outras origens
 */
 
-(async () => {
-    var loadLocal = false;
-    /* loadLocal faz o script carregar localmente (usando servidor http, no caso eu usei o live server mesmo) ao invez do github, serve para editar o script */
 
+
+(async () => {
+    var forceLoadLocal = false;
+    /* forceLoadLocal faz o script carregar localmente (usando servidor http, no caso eu usei o live server mesmo) ao invez do github, serve para editar o script */
+
+    /*
+        essas duas variaveis são os locais de on o script vai carregar
+        localScriptLocation se for carregar logal
+        gitHubLocation se for carregar do GitHub
+    */
     var localScriptLocation = "http://localhost:5500/server.js";
     var gitHubLocation = "https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/main/server.js";
 
-    var fetchLocation = loadLocal?
-                            localScriptLocation:
-                            gitHubLocation;
+    var savedLoadLocal;
+    if(localStorage.config_sysOverhaulSavedData == undefined){
+        localStorage.config_sysOverhaulSavedData = false;
+    }
+    savedLoadLocal = JSON.parse(localStorage.config_sysOverhaulSavedData);
 
-    var getPromisse = await fetch(fetchLocation);
-    var getScript = await getPromisse.text();
+    var loadLocal = savedLoadLocal || forceLoadLocal;
 
-    /* eslint no-eval: 0 */
-    eval(getScript);
+    var fetchLocation = loadLocal? localScriptLocation: gitHubLocation;
+
+    try {
+        var getPromisse = await fetch(fetchLocation);
+        var getScript = await getPromisse.text();
+        /* eslint no-eval: 0 */
+        eval(getScript);
+
+    } catch (err) {
+        if(err == "TypeError: Failed to fetch" && loadLocal){
+            let text = "Ocorreu um erro ao carregar o Script localmente.\nDeseja voltar a carregar do GitHub?";
+            if (confirm(text)) {
+                localStorage.config_sysOverhaulSavedData = false;
+                location.reload();
+            }
+        } else {
+            console.log(err);
+            alert("Ocorreu um erro ao carregar o Script:\n"+err);
+        }
+    }
 })();

@@ -133,6 +133,16 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
         element.innerHTML = thisBool? "✔": "✖";
     }
 
+    // config: Carregar Script localmente ou do GitHub
+    injectionLSHandler("config_sysOverhaulSavedData");
+    window.setLoadLocalScript = (element) => {
+        var thisBool = injectionLSReverse("config_sysOverhaulSavedData");
+
+        element.innerHTML = thisBool? "✔": "✖";
+
+        location.reload();
+    }
+
     // config: Ativar Blur da aba do Google Drive
     injectionLSHandler("config_ActiveDriveContainerBlur");
     window.setDriveContainerBlur = (element) => {
@@ -179,6 +189,10 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
                     <h4>Ativar Blur da aba do Google Drive<br>
                     (o Blur é apenas visual e ativado pode causar lentidão)</h4>
                     <p class="clickableButton" onclick="window.setDriveContainerBlur(this)">${window.config_ActiveDriveContainerBlur? "✔": "✖"}</p>
+                    <hr>
+
+                    <h4><span style="color: blue">Debug:</span> Carregar Script localmente</h4>
+                    <p class="clickableButton" onclick="window.setLoadLocalScript(this)">${window.config_sysOverhaulSavedData? "✔": "✖"}</p>
                     <hr>
 
                     <h4>Atualizar Cliente<br>
@@ -307,7 +321,7 @@ setInterval(() => {
                                 
                             if(window.savedData_orderStates.length){
                                 Array.from(document.querySelector("#sysOverhaulContextmenuItem").children).forEach(d => {
-                                    if(d.className != "customState") d.remove();
+                                    if(!d.classList.contains("customState")) d.remove();
                                 })
                                 document.querySelector("#sysOverhaulContextmenuItem").classList.remove("nostates");
 
@@ -565,16 +579,30 @@ setInterval(() => {
                                     background: white !important;
                                     border: none;
                                     color: black !important;
+                                    height: 35px;
                                     width: 70%;
+                                }
+                                #sysOverhaulContextmenuItem .customState.setFullSize input {
+                                    width: 100%;
                                 }
                                 #sysOverhaulContextmenuItem .customState div {
                                     background: blue !important;
                                     color: white !important;
                                     outline: 1px solid black;
+                                    height: 35px;
                                     width: 30%;
                                     cursor: pointer;
                                     user-select: none;
                                     text-align: center;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: space-around;
+                                }
+                                
+                                #sysOverhaulContextmenuItem .spacer {
+                                    background: black !important;
+                                    height: 5px;
+                                    width: 100%;
                                 }
 
                                 
@@ -591,6 +619,13 @@ setInterval(() => {
                                 <span class="simpleText">Só é nescessário carregar uma vez por dispositivo</span>
                                 <br>
                                 <br>
+                                <div class="customState spacer"></div>
+                                <div class="customState setFullSize">
+                                    <input type="text" placeholder="Observações"/>
+                                </div>
+                                <div class="customState setFullSize">
+                                    <input type="text" placeholder="Local de Amazenamento"/>
+                                </div>
                                 <div class="customState">
                                     <input type="text" placeholder="Status Especial"/>
                                     <div> Enviar </div>
@@ -605,7 +640,8 @@ setInterval(() => {
                     document.body.append(div, contextmenu, iframe);
 
                     addEventListener("click", (evt)=>{
-                        if(evt.target.placeholder == "Status Especial") return;
+                        var placeholders = ["Status Especial", "Observações", "Local de Amazenamento"];
+                        if(placeholders.includes(evt.target.placeholder)) return;
 
                         var ctxmenu = document.querySelector("#sysOverhaulContextmenuId");
                             ctxmenu.classList.add("hidden");
@@ -742,3 +778,17 @@ setInterval(() => {
 }, 500);
 
 
+
+
+// PARA CHECAR SE ESTA CARREGANDO
+
+/* 
+<span class="u-Processing" role="alert" style="top: 541.5px; left: 779.43px; background: black; color: white;">
+    <span class="u-Processing-spinner" style="background: black; color: white;">
+    </span>
+
+    </span><span class="u-VisuallyHidden" style="background: black; color: white;">
+        Processando
+    </span>
+</span>
+*/
