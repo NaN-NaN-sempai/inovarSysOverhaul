@@ -11,6 +11,211 @@
 // @grant        none
 // ==/UserScript==
 
+
+
+// window injection (sistema inovar)
+if(!document.location.href.includes("whatsapp") && window.location == window.parent.location){
+
+    window.tableGetCollumnIndex = (collumnName) => {
+        var list = document.querySelectorAll(".a-GV-row");
+        var tableHeader = list[0].children;
+        return Array.from(tableHeader).indexOf(Array.from(tableHeader).find(e => e.innerText.includes(collumnName)));
+    }
+    window.tableGetCollumnsElements = () => {
+        var list = document.querySelectorAll(".a-GV-row");
+        var tableHeader = list[0].children;
+        return Array.from(tableHeader);
+    }
+    window.getValueFromIndex = (parent, index) => {
+        return Array.from(parent.children)[index];
+    }
+    window.getValueFromCollumn = (parent, collumnName) => {
+        return Array.from(parent.children)[window.tableGetCollumnIndex(collumnName)];
+    }
+    window.getTextFromCollumn = (parent, collumnName) => {
+        return window.getValueFromCollumn(parent, collumnName)?.innerHTML || "<i>Valor não encontrado</i>"
+    }
+
+
+    window.getIframeLink = (element) => {
+        var iframeText = element.children[0].href;
+
+        var endText = decodeURIComponent(JSON.parse('"' + iframeText.replace(/\"/g, '\\"') + '"'));
+        endText = endText.split("apex.navigation.dialog('")[1];
+        endText = endText.split("',{title")[0];
+        return endText;
+    }
+
+
+    // Injection localStorage Handler
+    const injectionLSHandler = (key, value) => {
+        localStorage[key] = localStorage[key] == undefined? false: localStorage[key];
+
+        localStorage[key] = typeof value != "undefined"? JSON.stringify(value): localStorage[key];
+
+        window[key] = JSON.parse(localStorage[key]);
+        return window[key];
+    };
+    // Injection localStorage insertValue only if its empty
+    const injectionLSValues = (key, value) => {
+        localStorage[key] = localStorage[key] == undefined? value: localStorage[key];
+
+        window[key] = JSON.parse(localStorage[key]);
+        return window[key];
+    };
+    // Injection localStorage Reverse
+    const injectionLSReverse = (key) => {
+        return injectionLSHandler(key, !window[key]);
+    }
+
+
+
+    // saved data: order states
+    injectionLSValues("savedData_orderStates", "[]");
+
+
+
+    window.orderDataHolder = undefined;
+
+    // config: Modo escuro
+    injectionLSHandler("config_DarkModeActive");
+    window.insertDarkMode = (firstTime) => {
+        if(window.config_DarkModeActive){
+            window.config_DarkModeInterval = setInterval(() => {
+                Array.from(document.querySelectorAll("*")).forEach(e => {
+                    if(!(e.className?.includes("is-selected") || e.parentNode.className?.includes("is-selected")) && e.tagName != "P" && e.tagName != "A" && e.tagName != "IMG" && !e.classList.contains("searchNumberFound_result") && !e.classList.contains("fa")){
+                        e.style.background = "black";
+                    } else {
+                        e.style.background = "";
+                    }
+                    if((!e.style.color || e.style.color == "black") && !(e.classList.contains("clickableButton") || e.id == "searchNumberButton_insert")){
+                        e.style.color = "white";
+                    }
+                    if(e.className?.includes("is-selected") || e.parentNode.className?.includes("is-selected") || e.parentNode?.parentNode?.className?.includes("is-selected")){
+                        e.style.color = "black";
+                    }
+                    if(e.id == "contentDisplayContainer"){
+                        e.style.border = "1px white solid";
+                    }
+                    if(e.id == "driveDisplayContainer"){
+                        e.style.border = "1px white solid";
+                    }
+                })
+            }, 100);
+
+        } else if(!firstTime){
+            location.reload(true);
+        }
+        return window.config_DarkModeActive;
+    }
+    window.insertDarkMode(true);
+    window.config_DarkModeInterval = undefined;
+    window.setDarkMode = (element) => {
+        injectionLSReverse("config_DarkModeActive");
+
+        clearInterval(window.config_DarkModeInterval);
+        element.innerHTML = window.insertDarkMode()? "✔": "✖";
+    }
+
+    // config: Abrir Whatsapp direto no aplicativo
+    injectionLSHandler("config_ReplaceWhatsapp");
+    window.setReplaceWhatsapp = (element) => {
+        var thisBool = injectionLSReverse("config_ReplaceWhatsapp");
+
+        element.innerHTML = thisBool? "✔": "✖";
+    }
+    
+    // config: Abrir Whatsapp direto navegador (sem passar pela pagina de pergunta)
+    injectionLSHandler("config_ReplaceWhatsapp2");
+    window.setReplaceWhatsapp2 = (element) => {
+        var thisBool = injectionLSReverse("config_ReplaceWhatsapp2");
+
+        element.innerHTML = thisBool? "✔": "✖";
+    }
+
+    // config: Ativar Blur da aba do Google Drive
+    injectionLSHandler("config_ActiveDriveContainerBlur");
+    window.setDriveContainerBlur = (element) => {
+        var thisBool = injectionLSReverse("config_ActiveDriveContainerBlur");
+
+        element.innerHTML = thisBool? "✔": "✖";
+
+        document.querySelector('#driveDisplayContainer').style.filter = thisBool? "": "blur(0px)";
+    }
+
+
+    window.openContentInDisplayLastChoice = undefined;
+    window.openContentInDisplay = (content, forceShow) => {
+        var display = document.querySelector("#contentDisplayContainer");
+
+        var insertContent = (checkContent) => {
+            var title = "<h3>"+checkContent+"</h3>";
+            var showContent = "";
+
+            if(checkContent == "Dados do pedido"){
+                showContent = window.orderDataHolder == undefined?
+                                  "Nem um pedido selecionado.<br>Pressione o botão direito no link de contato de algum pedido para ver os dados do pedido.":
+                                  window.orderDataHolder;
+
+            } else {
+                
+                // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+                showContent = /* html */ `
+                    <h3>Configurações</h3><hr>
+
+                    <h4>Modo escuro</h4>
+                    <p class="clickableButton" onclick="window.setDarkMode(this)">${window.config_DarkModeActive? "✔": "✖"}</p>
+                    <hr>
+
+                    <h4>Abrir Whatsapp direto no aplicativo</h4>
+                    <p class="clickableButton" onclick="window.setReplaceWhatsapp(this)">${window.config_ReplaceWhatsapp? "✔": "✖"}</p>
+                    <hr>
+
+                    <h4>Abrir Whatsapp direto navegador <br>
+                    (sem passar pela pagina de pergunta)</h4>
+                    <p class="clickableButton" onclick="window.setReplaceWhatsapp2(this)">${window.config_ReplaceWhatsapp2? "✔": "✖"}</p>
+                    <hr>
+
+                    <h4>Ativar Blur da aba do Google Drive<br>
+                    (o Blur é apenas visual e ativado pode causar lentidão)</h4>
+                    <p class="clickableButton" onclick="window.setDriveContainerBlur(this)">${window.config_ActiveDriveContainerBlur? "✔": "✖"}</p>
+                    <hr>
+
+                    <h4>Atualizar Cliente<br>
+                    (ao atualiza é nescessário reiniciar o sistema)</h4>
+                    <p class="clickableButton" onclick="window.open('https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/main/client.user.js')">
+                        <img class="insertHtmlIcon" src="https://cdn-icons-png.flaticon.com/512/45/45162.png">
+                    </p>
+                `;
+                // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+            }
+
+            return title + showContent;
+        }
+
+        if(!display.classList.contains("show") || forceShow){
+            display.classList.add("show");
+            display.innerHTML = insertContent(content);
+
+        } else {
+            if(content == window.openContentInDisplayLastChoice){
+                display.classList.remove("show");
+
+            } else {
+                display.innerHTML = insertContent(content);
+            }
+        }
+        window.openContentInDisplayLastChoice = content;
+    };
+
+}
+
+
+
+
+
+
+
 var placeHtml = true;
 
 setInterval(() => {
@@ -34,9 +239,10 @@ setInterval(() => {
             // trocar foto do forms (TEMPORARIO)
             // eslint-disable-next-line
             Array.from(document.querySelectorAll("img"))
-                .filter(e => e.src=="https://image.flaticon.com/icons/png/512/2875/2875409.png")
+                .filter(e => e.src=="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRILNUIbumbGrgxoPQjPIu1aipobctMvwt7NQ&usqp=CAU")
                 .forEach(e => e.src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Google_Forms_logo_%282014-2020%29.svg/1489px-Google_Forms_logo_%282014-2020%29.svg.png");
 
+            // trocar link do whatsapp
             Array.from(document.querySelectorAll(".a-GV-row.is-readonly a"))
                 .filter(e=>e.href.includes("whatsapp"))
                 .forEach(e=>{
@@ -63,7 +269,78 @@ setInterval(() => {
                         });
                 });
 
+            /*
+                if: Main System
+                else: Pedido
+            */
             if(window.location == window.parent.location){
+                window.sysOverhaul = {
+                    teste: 12
+                }
+
+
+                // overwrite contextmenu
+                Array.from(document.querySelectorAll(".a-GV-row.is-readonly")).forEach(e => {
+                    const executeContext = (evtHolder, linkCollumId) => {  
+                        if(evtHolder.addedSysOverhaulInfo != undefined && evtHolder.addedSysOverhaulInfo) return;
+                        evtHolder.addedSysOverhaulInfo = true;
+                        evtHolder.style.cursor = "help";
+
+                        evtHolder.addEventListener("contextmenu", (evt) => {
+                            evt.preventDefault();
+
+                            var posOffset = 10;
+                            var ctxmenu = document.querySelector("#sysOverhaulContextmenuId");
+                                ctxmenu.classList.remove("hidden");
+                                ctxmenu.style.top = (evt.clientY + posOffset) + "px";
+                                ctxmenu.style.left = (evt.clientX + posOffset) + "px";
+
+                                var borderRadiusAmount = 20+"px";
+ 
+                                if(evt.clientY + posOffset + ctxmenu.offsetHeight > innerHeight){
+                                    ctxmenu.style.transform = "translate(0, -100%)";
+                                    ctxmenu.style.borderRadius = borderRadiusAmount+" "+borderRadiusAmount+" "+borderRadiusAmount + " 0";
+                                } else {
+                                    ctxmenu.style.transform = "translate(0, 0)";
+                                    ctxmenu.style.borderRadius = "0 "+borderRadiusAmount+" "+borderRadiusAmount+" "+borderRadiusAmount;
+                                }
+                                
+                            if(window.savedData_orderStates.length){
+                                Array.from(document.querySelector("#sysOverhaulContextmenuItem").children).forEach(d => {
+                                    if(d.className != "customState") d.remove();
+                                })
+                                document.querySelector("#sysOverhaulContextmenuItem").classList.remove("nostates");
+
+                                window.savedData_orderStates.forEach(e => {
+                                    var button = document.createElement("div");
+                                        button.className = "button";
+                                        button.innerHTML = e;
+                                        button.addEventListener("click", () => {
+                                            var collumnEl = document.getElementById(linkCollumId).parentElement;
+                                            var iframeLink = getValueFromIndex(evtHolder.parentElement, Array.from(collumnEl.parentElement.children).indexOf(collumnEl));
+                                            var linkString = iframeLink.querySelector("a").href.split(",{")[0].split("('")[1].replace("%27", "");
+                                            linkString = decodeURIComponent(JSON.parse(('"'+linkString+'"').replaceAll("/", "\\")))
+                                            
+                                            console.clear();
+                                            console.log(e);
+                                            console.log(iframeLink.querySelector("a").href);
+                                            console.log(linkString);
+                                            console.log(iframeLink);
+
+                                            document.getElementById("sysOverhaulIframeExecuteOrderChange").src = linkString;
+                                            open(linkString);
+                                        })
+
+                                    document.querySelector("#sysOverhaulContextmenuItem").prepend(button);
+                                });
+                            }
+                        }) 
+                    }
+
+                    executeContext(e.children[tableGetCollumnIndex("Design")], "C62756362372207112456_HDR");
+                    executeContext(e.children[tableGetCollumnIndex("Diagramação")], "C62756362434770112457_HDR");
+                })
+
                 Array.from(document.querySelectorAll('.a-GV-controlBreak')).forEach(e=>{
                     if(!window.config_DarkModeActive){
                         e.getElementsByClassName("a-GV-breakValue")[0].style.color = e.getElementsByClassName("a-GV-breakValue")[1].style.color = "blue";
@@ -244,9 +521,98 @@ setInterval(() => {
                     document.addEventListener('mouseenter', evt => {
                         document.querySelector('#driveDisplayContainer').classList.remove("offFocus");
                     });
-                    document.body.append(div);
+
+                    var contextmenu = document.createElement("div");
+                        contextmenu.id = "sysOverhaulContextmenuId";
+                        contextmenu.classList.add("hidden");
+                        contextmenu.innerHTML = /* html */ `
+                            <style>
+                                #sysOverhaulContextmenuId {
+                                    position: fixed;
+                                    z-index: 9999999999999999999;
+                                    overflow: hidden;
+                                    border: 2px solid black;
+                                    background: white !important;
+                                }
+                                #sysOverhaulContextmenuId.hidden {
+                                    display: none;
+                                }
+
+                                #sysOverhaulContextmenuItem {
+                                    background: white !important;
+                                }
+                                #sysOverhaulContextmenuItem .simpleText {
+                                    color: black !important;
+                                    background: white !important;
+                                }
+                                #sysOverhaulContextmenuItem .button {
+                                    color: black !important;
+                                    background: white !important;
+                                    padding: 10px;
+                                    outline: 1px solid black;
+                                    cursor: pointer;
+                                    user-select: none;
+                                }
+                                #sysOverhaulContextmenuItem .button:hover {
+                                    background: #cfcfcf !important;
+                                }
+                                #sysOverhaulContextmenuItem .customState {
+                                    display: flex;
+                                    background: white !important;
+                                    outline: 1px solid black;
+                                }
+                                #sysOverhaulContextmenuItem .customState input {
+                                    background: white !important;
+                                    border: none;
+                                    color: black !important;
+                                    width: 70%;
+                                }
+                                #sysOverhaulContextmenuItem .customState div {
+                                    background: blue !important;
+                                    color: white !important;
+                                    outline: 1px solid black;
+                                    width: 30%;
+                                    cursor: pointer;
+                                    user-select: none;
+                                    text-align: center;
+                                }
+
+                                
+                                #sysOverhaulContextmenuItem.nostates {
+                                    text-align: center;
+                                    padding: 10px;
+                                }
+                            </style>
+                            <div id="sysOverhaulContextmenuItem" class="nostates">
+                                <span class="simpleText">Sem estados carregados</span>
+                                <br>
+                                <span class="simpleText">Abra um pedido para carregar os estados</span>
+                                <br>
+                                <span class="simpleText">Só é nescessário carregar uma vez por dispositivo</span>
+                                <br>
+                                <br>
+                                <div class="customState">
+                                    <input type="text" placeholder="Status Especial"/>
+                                    <div> Enviar </div>
+                                </div>
+                            </div>
+                        `;
+
+                    var iframe = document.createElement("iframe");
+                        iframe.id = "sysOverhaulIframeExecuteOrderChange";
+                        iframe.style.border = "2px solid red";
+
+                    document.body.append(div, contextmenu, iframe);
+
+                    addEventListener("click", (evt)=>{
+                        if(evt.target.placeholder == "Status Especial") return;
+
+                        var ctxmenu = document.querySelector("#sysOverhaulContextmenuId");
+                            ctxmenu.classList.add("hidden");
+                    });
                 }
-            } else {
+            } else { 
+
                 if(placeHtml){
                     placeHtml = false;
 
@@ -299,9 +665,13 @@ setInterval(() => {
                         document.getElementById(pType+"_SITUACAO_DESIGN").style.display = "none";
                         Array.from(document.getElementById(pType+"_SITUACAO_DESIGN").children).forEach((e, i) => {
                             if(i){
+                                if(!window.parent.savedData_orderStates?.includes(e.value)) window.parent.savedData_orderStates.push(e.value);
                                 div2.innerHTML += `<span class='clickableButton stateButton${e.value == document.querySelector("#"+pType+"_SITUACAO_DESIGN").value? " stateSelected": ""}' onclick='window.insertValueInInput(this)'>${e.value}</span>`;
                             }
                         });
+
+                        localStorage.setItem("savedData_orderStates", JSON.stringify(window.parent.savedData_orderStates));
+
 
                         document.getElementById(pType+"_SITUACAO_DESIGN").parentNode.append(document.createElement("br"));
                         document.getElementById(pType+"_SITUACAO_DESIGN").parentNode.append(div2);
@@ -371,183 +741,4 @@ setInterval(() => {
     } catch { /* ignore errors */ }
 }, 500);
 
-
-// window injection (sistema inovar)
-if(!document.location.href.includes("whatsapp") && window.location == window.parent.location){
-
-    window.tableGetCollumnIndex = (collumnName) => {
-        var list = document.querySelectorAll(".a-GV-row");
-        var tableHeader = list[0].children;
-        return Array.from(tableHeader).indexOf(Array.from(tableHeader).find(e => e.innerText.includes(collumnName)));
-    }
-    window.getValueFromIndex = (parent, index) => {
-        return Array.from(parent.children)[index];
-    }
-    window.getValueFromCollumn = (parent, collumnName) => {
-        return Array.from(parent.children)[window.tableGetCollumnIndex(collumnName)];
-    }
-    window.getTextFromCollumn = (parent, collumnName) => {
-        return window.getValueFromCollumn(parent, collumnName)?.innerHTML || "<i>Valor não encontrado</i>"
-    }
-
-
-    window.getIframeLink = (element) => {
-        var iframeText = element.children[0].href;
-
-        var endText = decodeURIComponent(JSON.parse('"' + iframeText.replace(/\"/g, '\\"') + '"'));
-        endText = endText.split("apex.navigation.dialog('")[1];
-        endText = endText.split("',{title")[0];
-        return endText;
-    }
-
-
-    // Injection localStorage Handler
-    const injectionLSHandler = (key, value) => {
-        localStorage[key] = localStorage[key] == undefined? false: localStorage[key];
-
-        localStorage[key] = typeof value != "undefined"? value: localStorage[key];
-
-        window[key] = JSON.parse(localStorage[key]);
-        return window[key];
-    };
-    // Injection localStorage Reverse
-    const injectionLSReverse = (key) => {
-        return injectionLSHandler(key, !window[key]);
-    }
-
-
-    window.orderDataHolder = undefined;
-
-    // config: Modo escuro
-    injectionLSHandler("config_DarkModeActive");
-    window.insertDarkMode = (firstTime) => {
-        if(window.config_DarkModeActive){
-            window.config_DarkModeInterval = setInterval(() => {
-                Array.from(document.querySelectorAll("*")).forEach(e => {
-                    if(!(e.className?.includes("is-selected") || e.parentNode.className?.includes("is-selected")) && e.tagName != "P" && e.tagName != "A" && e.tagName != "IMG" && !e.classList.contains("searchNumberFound_result") && !e.classList.contains("fa")){
-                        e.style.background = "black";
-                    } else {
-                        e.style.background = "";
-                    }
-                    if((!e.style.color || e.style.color == "black") && !(e.classList.contains("clickableButton") || e.id == "searchNumberButton_insert")){
-                        e.style.color = "white";
-                    }
-                    if(e.className?.includes("is-selected") || e.parentNode.className?.includes("is-selected") || e.parentNode?.parentNode?.className?.includes("is-selected")){
-                        e.style.color = "black";
-                    }
-                    if(e.id == "contentDisplayContainer"){
-                        e.style.border = "1px white solid";
-                    }
-                    if(e.id == "driveDisplayContainer"){
-                        e.style.border = "1px white solid";
-                    }
-                })
-            }, 100);
-
-        } else if(!firstTime){
-            location.reload(true);
-        }
-        return window.config_DarkModeActive;
-    }
-    window.insertDarkMode(true);
-    window.config_DarkModeInterval = undefined;
-    window.setDarkMode = (element) => {
-        injectionLSReverse("config_DarkModeActive");
-
-        clearInterval(window.config_DarkModeInterval);
-        element.innerHTML = window.insertDarkMode()? "✔": "✖";
-    }
-
-    // config: Abrir Whatsapp direto no aplicativo
-    injectionLSHandler("config_ReplaceWhatsapp");
-    window.setReplaceWhatsapp = (element) => {
-        var thisBool = injectionLSReverse("config_ReplaceWhatsapp");
-
-        element.innerHTML = thisBool? "✔": "✖";
-    }
-    
-    // config: Abrir Whatsapp direto navegador (sem passar pela pagina de pergunta)
-    injectionLSHandler("config_ReplaceWhatsapp2");
-    window.setReplaceWhatsapp2 = (element) => {
-        var thisBool = injectionLSReverse("config_ReplaceWhatsapp2");
-
-        element.innerHTML = thisBool? "✔": "✖";
-    }
-
-    // config: Ativar Blur da aba do Google Drive
-    injectionLSHandler("config_ActiveDriveContainerBlur");
-    window.setDriveContainerBlur = (element) => {
-        var thisBool = injectionLSReverse("config_ActiveDriveContainerBlur");
-
-        element.innerHTML = thisBool? "✔": "✖";
-
-        document.querySelector('#driveDisplayContainer').style.filter = thisBool? "": "blur(0px)";
-    }
-
-
-    window.openContentInDisplayLastChoice = undefined;
-    window.openContentInDisplay = (content, forceShow) => {
-        var display = document.querySelector("#contentDisplayContainer");
-
-        var insertContent = (checkContent) => {
-            var title = "<h3>"+checkContent+"</h3>";
-            var showContent = "";
-
-            if(checkContent == "Dados do pedido"){
-                showContent = window.orderDataHolder == undefined?
-                                  "Nem um pedido selecionado.<br>Pressione o botão direito no link de contato de algum pedido para ver os dados do pedido.":
-                                  window.orderDataHolder;
-
-            } else {
-                
-                // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-                showContent = /* html */ `
-                    <h3>Configurações</h3><hr>
-
-                    <h4>Modo escuro</h4>
-                    <p class="clickableButton" onclick="window.setDarkMode(this)">${window.config_DarkModeActive? "✔": "✖"}</p>
-                    <hr>
-
-                    <h4>Abrir Whatsapp direto no aplicativo</h4>
-                    <p class="clickableButton" onclick="window.setReplaceWhatsapp(this)">${window.config_ReplaceWhatsapp? "✔": "✖"}</p>
-                    <hr>
-
-                    <h4>Abrir Whatsapp direto navegador <br>
-                    (sem passar pela pagina de pergunta)</h4>
-                    <p class="clickableButton" onclick="window.setReplaceWhatsapp2(this)">${window.config_ReplaceWhatsapp2? "✔": "✖"}</p>
-                    <hr>
-
-                    <h4>Ativar Blur da aba do Google Drive<br>
-                    (o Blur é apenas visual e ativado pode causar lentidão)</h4>
-                    <p class="clickableButton" onclick="window.setDriveContainerBlur(this)">${window.config_ActiveDriveContainerBlur? "✔": "✖"}</p>
-                    <hr>
-
-                    <h4>Atualizar Cliente<br>
-                    (ao atualiza é nescessário reiniciar o sistema)</h4>
-                    <p class="clickableButton" onclick="window.open('https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/main/client.user.js')">
-                        <img class="insertHtmlIcon" src="https://cdn-icons-png.flaticon.com/512/45/45162.png">
-                    </p>
-                `;
-                // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
-            }
-
-            return title + showContent;
-        }
-
-        if(!display.classList.contains("show") || forceShow){
-            display.classList.add("show");
-            display.innerHTML = insertContent(content);
-
-        } else {
-            if(content == window.openContentInDisplayLastChoice){
-                display.classList.remove("show");
-
-            } else {
-                display.innerHTML = insertContent(content);
-            }
-        }
-        window.openContentInDisplayLastChoice = content;
-    };
-
-}
 
