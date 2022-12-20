@@ -309,41 +309,61 @@ setInterval(() => {
                                 ctxmenu.style.top = (evt.clientY + posOffset) + "px";
                                 ctxmenu.style.left = (evt.clientX + posOffset) + "px";
 
-                                var borderRadiusAmount = 20+"px";
- 
-                                if(evt.clientY + posOffset + ctxmenu.offsetHeight > innerHeight){
-                                    ctxmenu.style.transform = "translate(0, -100%)";
-                                    ctxmenu.style.borderRadius = borderRadiusAmount+" "+borderRadiusAmount+" "+borderRadiusAmount + " 0";
-                                } else {
-                                    ctxmenu.style.transform = "translate(0, 0)";
-                                    ctxmenu.style.borderRadius = "0 "+borderRadiusAmount+" "+borderRadiusAmount+" "+borderRadiusAmount;
-                                }
+                            var borderRadiusAmount = 20+"px";
+
+                            if(evt.clientY + posOffset + ctxmenu.offsetHeight > innerHeight){
+                                ctxmenu.style.transform = "translate(0, -100%)";
+                                ctxmenu.style.borderRadius = borderRadiusAmount+" "+borderRadiusAmount+" "+borderRadiusAmount + " 0";
+                            } else {
+                                ctxmenu.style.transform = "translate(0, 0)";
+                                ctxmenu.style.borderRadius = "0 "+borderRadiusAmount+" "+borderRadiusAmount+" "+borderRadiusAmount;
+                            }
                                 
                             if(window.savedData_orderStates.length){
+                                document.querySelector("#sysOverhaulOrderObs").value = "";
+                                document.querySelector("#sysOverhaulOrderArmz").value = "";
+                                document.querySelector("#sysOverhaulOrderSpecial").value = "";
+
+                                document.querySelector("#sysOverhaulOrderArmz").focus();
+
                                 Array.from(document.querySelector("#sysOverhaulContextmenuItem").children).forEach(d => {
                                     if(!d.classList.contains("customState")) d.remove();
                                 })
                                 document.querySelector("#sysOverhaulContextmenuItem").classList.remove("nostates");
 
-                                window.savedData_orderStates.forEach(e => {
+                                const clickFunction = (status) => {
+                                    var collumnEl = document.getElementById(linkCollumId).parentElement;
+                                    var iframeLink = getValueFromIndex(evtHolder.parentElement, Array.from(collumnEl.parentElement.children).indexOf(collumnEl));
+                                    var linkString = iframeLink.querySelector("a").href.split(",{")[0].split("('")[1].replace("%27", "");
+                                    linkString = decodeURIComponent(JSON.parse(('"'+linkString+'"').replaceAll("/", "\\")))
+                                    
+                                    console.clear();
+                                    console.log(status);
+                                    console.log(iframeLink.querySelector("a").href);
+                                    console.log(linkString);
+                                    console.log(iframeLink);
+
+                                    window.sysOverhaulContextChangeData = {
+                                        obs: document.querySelector("#sysOverhaulOrderObs").value,
+                                        arm: document.querySelector("#sysOverhaulOrderArmz").value,
+                                        status: status
+                                    }
+
+                                    document.getElementById("sysOverhaulIframeExecuteOrderChange").src = linkString;
+                                    //open(linkString);
+                                }
+
+                                window.savedData_orderStates.reverse().forEach(e => {
                                     var button = document.createElement("div");
                                         button.className = "button";
                                         button.innerHTML = e;
-                                        button.addEventListener("click", () => {
-                                            var collumnEl = document.getElementById(linkCollumId).parentElement;
-                                            var iframeLink = getValueFromIndex(evtHolder.parentElement, Array.from(collumnEl.parentElement.children).indexOf(collumnEl));
-                                            var linkString = iframeLink.querySelector("a").href.split(",{")[0].split("('")[1].replace("%27", "");
-                                            linkString = decodeURIComponent(JSON.parse(('"'+linkString+'"').replaceAll("/", "\\")))
-                                            
-                                            console.clear();
-                                            console.log(e);
-                                            console.log(iframeLink.querySelector("a").href);
-                                            console.log(linkString);
-                                            console.log(iframeLink);
-
-                                            document.getElementById("sysOverhaulIframeExecuteOrderChange").src = linkString;
-                                            open(linkString);
-                                        })
+                                        button.addEventListener("click", () => clickFunction(e));
+                                    
+                                    var specialStatusButton = document.querySelector("#sysOverhaulOrderSpecial").parentElement.querySelector("div"); 
+                                    var replaceButton = specialStatusButton.cloneNode(true);
+                                    specialStatusButton.parentNode.replaceChild(replaceButton, specialStatusButton);
+                                    specialStatusButton = document.querySelector("#sysOverhaulOrderSpecial").parentElement.querySelector("div"); 
+                                    specialStatusButton.addEventListener("click", () => clickFunction(document.querySelector("#sysOverhaulOrderSpecial").value));
 
                                     document.querySelector("#sysOverhaulContextmenuItem").prepend(button);
                                 });
@@ -547,6 +567,7 @@ setInterval(() => {
                                     overflow: hidden;
                                     border: 2px solid black;
                                     background: white !important;
+                                    transition: top .2s ease-out;
                                 }
                                 #sysOverhaulContextmenuId.hidden {
                                     display: none;
@@ -621,13 +642,13 @@ setInterval(() => {
                                 <br>
                                 <div class="customState spacer"></div>
                                 <div class="customState setFullSize">
-                                    <input type="text" placeholder="Observações"/>
+                                    <input id="sysOverhaulOrderObs" type="text" placeholder="Observações"/>
                                 </div>
                                 <div class="customState setFullSize">
-                                    <input type="text" placeholder="Local de Amazenamento"/>
+                                    <input id="sysOverhaulOrderArmz" type="text" placeholder="Local de Amazenamento"/>
                                 </div>
                                 <div class="customState">
-                                    <input type="text" placeholder="Status Especial"/>
+                                    <input id="sysOverhaulOrderSpecial" type="text" placeholder="Status Especial"/>
                                     <div> Enviar </div>
                                 </div>
                             </div>
@@ -635,7 +656,8 @@ setInterval(() => {
 
                     var iframe = document.createElement("iframe");
                         iframe.id = "sysOverhaulIframeExecuteOrderChange";
-                        iframe.style.border = "2px solid red";
+                        iframe.style.display =  "none";
+                        //iframe.style.border = "2px solid red";
 
                     document.body.append(div, contextmenu, iframe);
 
@@ -646,10 +668,77 @@ setInterval(() => {
                         var ctxmenu = document.querySelector("#sysOverhaulContextmenuId");
                             ctxmenu.classList.add("hidden");
                     });
+
+                    addEventListener("wheel", (evt) => {
+
+                        var moveAmount = evt.wheelDelta/(window.sysOverhaulDebugWheelDiv || 2);
+                        var posOffset = 10;
+                        var borderRadiusAmount = 20+"px";
+ 
+                        var scrollBarPos =  document.querySelector("html").scrollTop;
+                        var scrollBarHeight = document.querySelector("html").offsetHeight - document.querySelector("html").clientHeight;
+
+                        if((scrollBarPos == 0 && moveAmount > 0) || (scrollBarPos > scrollBarHeight - 1 && moveAmount < 0)) return;
+                        
+                        var ctxmenu = document.querySelector("#sysOverhaulContextmenuId");
+
+                        if(evt.clientY + posOffset + ctxmenu.offsetHeight + moveAmount > innerHeight){
+                            ctxmenu.style.transform = "translate(0, -100%)";
+                            ctxmenu.style.borderRadius = borderRadiusAmount+" "+borderRadiusAmount+" "+borderRadiusAmount + " 0";
+                        } else {
+                            ctxmenu.style.transform = "translate(0, 0)";
+                            ctxmenu.style.borderRadius = "0 "+borderRadiusAmount+" "+borderRadiusAmount+" "+borderRadiusAmount;
+                        }
+
+                        ctxmenu.style.top = (parseInt(ctxmenu.style.top.replace("px", "")) + moveAmount) + "px"; 
+
+
+                    });
                 }
             } else { 
 
                 if(placeHtml){
+                    if(window.parent.sysOverhaulContextChangeData != undefined){
+                        console.log(window.parent.sysOverhaulContextChangeData);
+
+                        var data = window.parent.sysOverhaulContextChangeData;
+
+                        var pType = document.querySelector(".t-Dialog")?.querySelector("input").id.slice(0,2).toUpperCase();
+
+                        if(data.status){
+                            var existIn = Array.from(document.querySelector("#"+pType+"_SITUACAO_DESIGN").children).find(e => e.innerHTML == data.status);
+
+                            if(existIn){
+                                document.querySelector("#"+pType+"_SITUACAO_DESIGN").value = data.status;
+                            } else {
+                                var createdCustomOpt = document.createElement("option");
+                                    createdCustomOpt.innerHTML = "Status Customizado"; 
+                                    createdCustomOpt.value = data.status;
+    
+                                    document.getElementById(pType+"_SITUACAO_DESIGN").append(createdCustomOpt);
+                                    document.querySelector("#"+pType+"_SITUACAO_DESIGN").value = data.status;
+                            }
+                        }
+
+                        if(data.obs){
+                            document.querySelector("#"+pType+"_OBSERVACAO_DESIGN_PRODUCAO").value = data.obs;
+                            console.log(document.querySelector("#"+pType+"_OBSERVACAO_DESIGN_PRODUCAO").value);
+                        }
+
+                        if(data.arm){
+                            document.querySelector("#"+pType+"_LOCAL_ARMAZENAMENTO_DESIGN").value = data.arm;
+                            console.log(document.querySelector("#"+pType+"_LOCAL_ARMAZENAMENTO_DESIGN").value);
+                        }
+
+                        window.parent.sysOverhaulContextChangeData = undefined;
+
+                        apex.submit({request:'SAVE',validate:true});
+                        window.parent.apex.submit();
+
+                        return placeHtml = false;
+                    }
+
+
                     placeHtml = false;
 
                     var pType = document.querySelector(".t-Dialog")?.querySelector("input").id.slice(0,2).toUpperCase();
