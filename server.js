@@ -133,6 +133,14 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
         element.innerHTML = thisBool? "✔": "✖";
     }
 
+    // config: Marcar pedido como "Editado" ao envez de reiniciar
+    injectionLSHandler("config_sysOverhaulContextMenuNoRestart");
+    window.setContextMenuNoRestart = (element) => {
+        var thisBool = injectionLSReverse("config_sysOverhaulContextMenuNoRestart");
+
+        element.innerHTML = thisBool? "✔": "✖";
+    }
+
     // config: Carregar Script localmente ou do GitHub
     injectionLSHandler("config_sysOverhaulSavedData");
     window.setLoadLocalScript = (element) => {
@@ -173,20 +181,25 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
                 showContent = /* html */ `
                     <h3>Configurações</h3><hr>
 
-                    <h4>Modo escuro</h4>
+                    <h4><span style="color: grey">Utils:</span> Modo escuro</h4>
                     <p class="clickableButton" onclick="window.setDarkMode(this)">${window.config_DarkModeActive? "✔": "✖"}</p>
                     <hr>
 
-                    <h4>Abrir Whatsapp direto no aplicativo</h4>
+                    <h4><span style="color: grey">Utils:</span> Marcar pedido como "Editado" ao invés de reiniciar a página<br>
+                    (ao usar o menu de contexto (botão direito) para editar)</h4>
+                    <p class="clickableButton" onclick="window.setContextMenuNoRestart(this)">${window.config_sysOverhaulContextMenuNoRestart? "✔": "✖"}</p>
+                    <hr>
+
+                    <h4><span style="color: green">Whatsapp:</span> Abrir Whatsapp direto no aplicativo</h4>
                     <p class="clickableButton" onclick="window.setReplaceWhatsapp(this)">${window.config_ReplaceWhatsapp? "✔": "✖"}</p>
                     <hr>
 
-                    <h4>Abrir Whatsapp direto navegador <br>
-                    (sem passar pela pagina de pergunta)</h4>
+                    <h4><span style="color: green">Whatsapp:</span> Abrir Whatsapp direto navegador <br>
+                    (sem passar pela página de confirmação)</h4>
                     <p class="clickableButton" onclick="window.setReplaceWhatsapp2(this)">${window.config_ReplaceWhatsapp2? "✔": "✖"}</p>
                     <hr>
 
-                    <h4>Ativar Blur da aba do Google Drive<br>
+                    <h4><span style="color: yellow">Drive:</span> Ativar Blur da aba do Google Drive<br>
                     (o Blur é apenas visual e ativado pode causar lentidão)</h4>
                     <p class="clickableButton" onclick="window.setDriveContainerBlur(this)">${window.config_ActiveDriveContainerBlur? "✔": "✖"}</p>
                     <hr>
@@ -195,8 +208,8 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
                     <p class="clickableButton" onclick="window.setLoadLocalScript(this)">${window.config_sysOverhaulSavedData? "✔": "✖"}</p>
                     <hr>
 
-                    <h4>Atualizar Cliente<br>
-                    (ao atualiza é nescessário reiniciar o sistema)</h4>
+                    <h4><span style="color: #bbbbbb">Client:</span> Atualizar Cliente<br>
+                    (ao atualizar é nescessário reiniciar o sistema)</h4>
                     <p class="clickableButton" onclick="window.open('https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/main/client.user.js')">
                         <img class="insertHtmlIcon" src="https://cdn-icons-png.flaticon.com/512/45/45162.png">
                     </p>
@@ -231,6 +244,7 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
 
 
 var placeHtml = true;
+var placeHtmlMain = true;
 
 setInterval(() => {
     try {
@@ -292,6 +306,15 @@ setInterval(() => {
                     teste: 12
                 }
 
+                if(placeHtmlMain) {
+                    placeHtmlMain = false;
+ 
+                    var style = document.createElement("style");
+                        style.innerHTML = `.sysUpdateMarkedAsUpdated { background: #03315e !important; }`;
+                    
+                    document.body.append(style);
+                }
+
 
                 // overwrite contextmenu
                 Array.from(document.querySelectorAll(".a-GV-row.is-readonly")).forEach(e => {
@@ -337,20 +360,38 @@ setInterval(() => {
                                     var linkString = iframeLink.querySelector("a").href.split(",{")[0].split("('")[1].replace("%27", "");
                                     linkString = decodeURIComponent(JSON.parse(('"'+linkString+'"').replaceAll("/", "\\")))
                                     
-                                    console.clear();
+                                    /* console.clear();
                                     console.log(status);
                                     console.log(iframeLink.querySelector("a").href);
                                     console.log(linkString);
-                                    console.log(iframeLink);
+                                    console.log(iframeLink); */
+
+                                    var id = "IFRAME_" + (() => ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+                                        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+                                    ))()
 
                                     window.sysOverhaulContextChangeData = {
                                         obs: document.querySelector("#sysOverhaulOrderObs").value,
                                         arm: document.querySelector("#sysOverhaulOrderArmz").value,
-                                        status: status
+                                        status: status,
+
+                                        iframeId: id
                                     }
 
-                                    document.getElementById("sysOverhaulIframeExecuteOrderChange").src = linkString;
-                                    //open(linkString);
+                                    console.log(evtHolder.parentElement);
+                                    Array.from(evtHolder.parentElement.children).forEach(c => {
+                                        c.classList.add("sysUpdateMarkedAsUpdated");
+                                    });
+
+                                    
+                                    var iframe = document.createElement("iframe");
+                                        iframe.src = linkString;
+                                        iframe.id = id;
+                                        iframe.style.display =  "none";
+
+                                    document.body.append(iframe);
+
+                                    /* document.getElementById("sysOverhaulIframeExecuteOrderChange").src = linkString; */
                                 }
 
                                 window.savedData_orderStates.reverse().forEach(e => {
@@ -731,9 +772,15 @@ setInterval(() => {
                         }
 
                         window.parent.sysOverhaulContextChangeData = undefined;
-
+                        
                         apex.submit({request:'SAVE',validate:true});
-                        window.parent.apex.submit();
+                        if(!window.parent.config_sysOverhaulContextMenuNoRestart){
+                            window.parent.apex.submit();
+                        } else {
+                            setTimeout(() => {
+                                window.parent.document.getElementById(data.iframeId).remove();
+                            }, 5000);
+                        }
 
                         return placeHtml = false;
                     }
