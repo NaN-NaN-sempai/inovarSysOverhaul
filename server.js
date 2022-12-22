@@ -104,6 +104,7 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
             }, 100);
 
         } else if(!firstTime){
+            apex.util.showSpinner();
             location.reload(true);
         }
         return window.config_DarkModeActive;
@@ -147,6 +148,7 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
         var thisBool = injectionLSReverse("config_sysOverhaulSavedData");
 
         element.innerHTML = thisBool? "✔": "✖";
+        apex.util.showSpinner();
 
         location.reload();
     }
@@ -319,6 +321,7 @@ setInterval(() => {
                 // overwrite contextmenu
                 Array.from(document.querySelectorAll(".a-GV-row.is-readonly")).forEach(e => {
                     const executeContext = (evtHolder, linkCollumId) => {  
+                        if(!evtHolder) return;
                         if(evtHolder.addedSysOverhaulInfo != undefined && evtHolder.addedSysOverhaulInfo) return;
                         evtHolder.addedSysOverhaulInfo = true;
                         evtHolder.style.cursor = "help";
@@ -394,7 +397,7 @@ setInterval(() => {
                                     /* document.getElementById("sysOverhaulIframeExecuteOrderChange").src = linkString; */
                                 }
 
-                                window.savedData_orderStates.reverse().forEach(e => {
+                                window.savedData_orderStates.slice().reverse().forEach(e => {
                                     var button = document.createElement("div");
                                         button.className = "button";
                                         button.innerHTML = e;
@@ -580,7 +583,7 @@ setInterval(() => {
                             
                             <div class="sideButtonsContainer">
                             <p class="clickableButton" onclick="window.openContentInDisplay(this.innerHTML)">Dados do pedido</p>
-                                <p class="clickableButton" onclick="apex.submit()">Recarregar lista</p>
+                                <p class="clickableButton" onclick="apex.regions['R123756118202154357494'].refresh();">Recarregar lista</p>
                                 <p class="clickableButton" onclick="document.querySelector('#driveDisplayContainer').classList.toggle('show'); this.style.opacity=''">
                                     <img class="driveIcon" src="https://cdn-icons-png.flaticon.com/512/5968/5968523.png">
                                 </p>
@@ -695,12 +698,7 @@ setInterval(() => {
                             </div>
                         `;
 
-                    var iframe = document.createElement("iframe");
-                        iframe.id = "sysOverhaulIframeExecuteOrderChange";
-                        iframe.style.display =  "none";
-                        //iframe.style.border = "2px solid red";
-
-                    document.body.append(div, contextmenu, iframe);
+                    document.body.append(div, contextmenu);
 
                     addEventListener("click", (evt)=>{
                         var placeholders = ["Status Especial", "Observações", "Local de Amazenamento"];
@@ -775,12 +773,12 @@ setInterval(() => {
                         
                         apex.submit({request:'SAVE',validate:true});
                         if(!window.parent.config_sysOverhaulContextMenuNoRestart){
-                            window.parent.apex.submit();
-                        } else {
-                            setTimeout(() => {
-                                window.parent.document.getElementById(data.iframeId).remove();
-                            }, 5000);
+                            window.parent.apex.regions["R123756118202154357494"].refresh();
                         }
+                        
+                        setTimeout(() => {
+                            window.parent.document.getElementById(data.iframeId).remove();
+                        }, 5000);
 
                         return placeHtml = false;
                     }
