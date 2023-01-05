@@ -24,7 +24,7 @@ if(window.sysOverhaulClientWantedVersion != window.sysOverhaulClientVersion) {
     }
 
     if(!document.location.href.includes("whatsapp") && document.location.href.includes("ambiente_loja")){
-        apex.message.confirm(text);
+        apex.message.confirm(text, callBack);
         
     } else {
         var confirmation = confirm(text);
