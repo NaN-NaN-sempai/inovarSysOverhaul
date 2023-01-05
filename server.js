@@ -209,6 +209,7 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
         element.innerHTML = thisBool? "✔": "✖";
         apex.util.showSpinner();
 
+        if(!thisBool) injectionLSHandler("config_sysOverhaulLiveReload", false);
         location.reload();
     }
 
