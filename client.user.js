@@ -17,16 +17,19 @@
     aceita iframe de outra origem tambem, então eu to usando duas
     extenções aqui pra fazer isso funcionar, a primeira:
 
-    Disable Content-Security-Policy - https://chrome.google.com/webstore/detail/disable-content-security/ieelmcmcagommplceebfedjlakkhpden
+    Disable Content-Security-Policy
+    https://chrome.google.com/webstore/detail/disable-content-security/ieelmcmcagommplceebfedjlakkhpden
     Faz os sites aceitarem inserção de outras origens
 
-    Ignore X-Frame headers - https://chrome.google.com/webstore/detail/ignore-x-frame-headers/gleekbfjekiniecknbkamfmkohkpodhe
+    Ignore X-Frame headers:
+    https://chrome.google.com/webstore/detail/ignore-x-frame-headers/gleekbfjekiniecknbkamfmkohkpodhe
     Faz os sites aceitarem iframe de outras origens
 */
 
 
 
-(async () => {
+window.sysOverhaulClientVersion = 1;
+window.sysOverhaulLoadScript = async () => {
     var forceLoadLocal = false;
     /* forceLoadLocal faz o script carregar localmente (usando servidor http, no caso eu usei o live server mesmo) ao invez do github, serve para editar o script */
 
@@ -56,14 +59,17 @@
 
     } catch (err) {
         if(err == "TypeError: Failed to fetch" && loadLocal){
-            let text = "Ocorreu um erro ao carregar o Script localmente.\nDeseja voltar a carregar do GitHub?";
-            if (confirm(text)) {
-                localStorage.config_sysOverhaulSavedData = false;
-                location.reload();
-            }
+            let text = 'Ocorreu um erro ao carregar o Script "Inovar Overhaul - Server" localmente.\n\nDeseja voltar a carregar do GitHub?';
+            window.apex.message.confirm(text, (confimation) => {
+                if (confimation) {
+                    localStorage.config_sysOverhaulSavedData = false;
+                    location.reload();
+                }
+            })
         } else {
             console.log(err);
-            alert("Ocorreu um erro ao carregar o Script:\n"+err);
+            window.apex.message.alert('Ocorreu um erro ao carregar o Script "Inovar Overhaul - Server":\n\n'+err);
         }
     }
-})();
+};
+window.sysOverhaulLoadScript();

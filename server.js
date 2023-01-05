@@ -13,6 +13,53 @@
 
 
 
+
+window.sysOverhaulClientWantedVersion = 1;
+
+if(window.sysOverhaulClientWantedVersion != window.sysOverhaulClientVersion) {
+    var text = 'Existe uma nova versão do "Inovar Overhaul - Client", deseja atualizar?\n\nFicar com uma versão desatualizada pode causar erros.\n\nQuando atualizar será nescessário reiniciar a página do sistema.';
+
+    var callBack = (c) => {
+        if(c) window.open('https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/main/client.user.js');
+    }
+
+    if(!document.location.href.includes("whatsapp") && document.location.href.includes("ambiente_loja")){
+        apex.message.confirm(text);
+        
+    } else {
+        var confirmation = confirm(text);
+        callBack(confirmation);
+    }
+}
+
+
+var sysOverhaulIntervalList = JSON.parse(localStorage.sysOverhaulIntervalList || "[]");
+
+sysOverhaulIntervalList.forEach(interval => clearInterval(interval));
+sysOverhaulIntervalList = [];
+localStorage.sysOverhaulIntervalList = "[]";
+const customInterval = (func, milliseconds) => {
+    var interval = setInterval(func, milliseconds);
+
+    sysOverhaulIntervalList.push(interval);
+    localStorage.sysOverhaulIntervalList = JSON.stringify(sysOverhaulIntervalList);
+
+    return interval;
+}
+
+document.querySelectorAll("[data-remove-indentificator]")?.forEach(e => e.remove());
+const customAppend = (e, sel = document.body) => {
+    e.dataset.removeIndentificator = "true";
+ 
+    sel.append(e);
+}
+
+
+
+
+
+
+
 // window injection (sistema inovar)
 if(!document.location.href.includes("whatsapp") && window.location == window.parent.location){
 
@@ -81,27 +128,39 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
     injectionLSHandler("config_DarkModeActive");
     window.insertDarkMode = (firstTime) => {
         if(window.config_DarkModeActive){
-            window.config_DarkModeInterval = setInterval(() => {
+            window.config_DarkModeInterval = customInterval(() => {
                 Array.from(document.querySelectorAll("*")).forEach(e => {
+                    if(e.id == "sysOverhaulLiveReloadIframe" || document.querySelector("body").ownerDocument.defaultView.origin == "http://localhost:5500") return;
+
+                    if(e.className == "ui-widget-overlay ui-front") return;
+                    
+                    if(e.classList.contains("ui-dialog")) e.style.border = "1px solid white";
+                    
                     if(!(e.className?.includes("is-selected") || e.parentNode.className?.includes("is-selected")) && e.tagName != "P" && e.tagName != "A" && e.tagName != "IMG" && !e.classList.contains("searchNumberFound_result") && !e.classList.contains("fa")){
                         e.style.background = "black";
+
                     } else {
                         e.style.background = "";
                     }
+
                     if((!e.style.color || e.style.color == "black") && !(e.classList.contains("clickableButton") || e.id == "searchNumberButton_insert")){
                         e.style.color = "white";
                     }
+
                     if(e.className?.includes("is-selected") || e.parentNode.className?.includes("is-selected") || e.parentNode?.parentNode?.className?.includes("is-selected")){
                         e.style.color = "black";
                     }
+
                     if(e.id == "contentDisplayContainer"){
                         e.style.border = "1px white solid";
                     }
+
                     if(e.id == "driveDisplayContainer"){
                         e.style.border = "1px white solid";
                     }
                 })
             }, 100);
+
 
         } else if(!firstTime){
             apex.util.showSpinner();
@@ -153,6 +212,62 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
         location.reload();
     }
 
+    // config: Mostrar botão para reiniciar script
+    injectionLSHandler("config_sysOverhaulShowRestart");
+    window.setShowRestart = (element) => {
+        var thisBool = injectionLSReverse("config_sysOverhaulShowRestart");
+
+        element.innerHTML = thisBool? "✔": "✖";
+        
+        document.getElementById("sysOverHaulReloadScripButton").classList.toggle("hidden", !thisBool);
+    }
+
+    // config: Mostrar botão para reiniciar script
+    injectionLSHandler("config_sysOverhaulLiveReload");
+    var createLiveReloadIframe = () => {
+        
+        var liveReloadIframe = document.createElement("iframe");
+        liveReloadIframe.id = "sysOverhaulLiveReloadIframe";
+        liveReloadIframe.style.height = "35px";
+        liveReloadIframe.style.position = "fixed";
+        liveReloadIframe.style.bottom = "0";
+        liveReloadIframe.style.left =  "0";
+        liveReloadIframe.style.background =  "white";
+        liveReloadIframe.style.width =  "210px";
+        liveReloadIframe.style.borderRadius =  "0 10px 0 0";
+        liveReloadIframe.style.zIndex =  "99999999999999";
+        liveReloadIframe.src = "http://localhost:5500/";
+
+        customAppend(liveReloadIframe);
+
+        window.sysOverhaulMessageCatcher = window.sysOverhaulMessageCatcher? window.sysOverhaulMessageCatcher: e => {
+            if(e.origin != "http://localhost:5500") return;
+
+            console.log(e.data);
+
+            if(e.data == "sysOverhaulLoadScript" && window.config_sysOverhaulLiveReload) window.sysOverhaulLoadScript();
+        }
+
+        removeEventListener("message", window.sysOverhaulMessageCatcher, true);
+        addEventListener('message', window.sysOverhaulMessageCatcher, true);
+    }
+    if(config_sysOverhaulLiveReload) createLiveReloadIframe();
+    window.setLiveReload = (element) => {
+        if(!window.config_sysOverhaulSavedData) return;
+
+        var thisBool = injectionLSReverse("config_sysOverhaulLiveReload");
+
+        element.innerHTML = thisBool? "✔": "✖";
+
+        if(thisBool) {
+            createLiveReloadIframe();
+        } else {
+            document.getElementById("sysOverhaulLiveReloadIframe").remove();
+        }
+
+        apex.message.alert("Live Reload do Script " + (thisBool? "ativado": "desativado") + ".");
+    }
+
     // config: Ativar Blur da aba do Google Drive
     injectionLSHandler("config_ActiveDriveContainerBlur");
     window.setDriveContainerBlur = (element) => {
@@ -183,35 +298,57 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
                 showContent = /* html */ `
                     <h3>Configurações</h3><hr>
 
-                    <h4><span style="color: grey">Utils:</span> Modo escuro</h4>
+                    <h4><span style="color: grey">Utils:</span><br>
+                    Modo escuro</h4>
                     <p class="clickableButton" onclick="window.setDarkMode(this)">${window.config_DarkModeActive? "✔": "✖"}</p>
                     <hr>
 
-                    <h4><span style="color: grey">Utils:</span> Marcar pedido como "Editado" ao invés de reiniciar a página<br>
-                    (ao usar o menu de contexto (botão direito) para editar)</h4>
+                    <h4><span style="color: grey">Utils:</span><br>
+                    Marcar pedido como "Editado" e não reiniciar a lista<br>
+                    <i>(ao usar o botão direito para editar)</i></h4>
                     <p class="clickableButton" onclick="window.setContextMenuNoRestart(this)">${window.config_sysOverhaulContextMenuNoRestart? "✔": "✖"}</p>
                     <hr>
 
-                    <h4><span style="color: green">Whatsapp:</span> Abrir Whatsapp direto no aplicativo</h4>
+                    <h4><span style="color: green">Whatsapp:</span><br>
+                    Abrir Whatsapp direto no aplicativo</h4>
                     <p class="clickableButton" onclick="window.setReplaceWhatsapp(this)">${window.config_ReplaceWhatsapp? "✔": "✖"}</p>
                     <hr>
 
-                    <h4><span style="color: green">Whatsapp:</span> Abrir Whatsapp direto navegador <br>
-                    (sem passar pela página de confirmação)</h4>
+                    <h4><span style="color: green">Whatsapp:</span><br>
+                    Abrir Whatsapp direto navegador <br>
+                    <i>(sem passar pela página de confirmação)</i></h4>
                     <p class="clickableButton" onclick="window.setReplaceWhatsapp2(this)">${window.config_ReplaceWhatsapp2? "✔": "✖"}</p>
                     <hr>
 
-                    <h4><span style="color: yellow">Drive:</span> Ativar Blur da aba do Google Drive<br>
-                    (o Blur é apenas visual e ativado pode causar lentidão)</h4>
+                    <h4><span style="color: yellow">Drive:</span><br>
+                    Ativar Blur da aba do Google Drive<br>
+                    <i>(o Blur é apenas visual e ativado pode causar lentidão)</i></h4>
                     <p class="clickableButton" onclick="window.setDriveContainerBlur(this)">${window.config_ActiveDriveContainerBlur? "✔": "✖"}</p>
                     <hr>
 
-                    <h4><span style="color: blue">Debug:</span> Carregar Script localmente</h4>
+                    <h4><span style="color: blue">Debug:</span><br>
+                    Mostrar botão de recarregar Script<br>
+                    <i>(no menu lateral)</i></h4>
+                    <p class="clickableButton" onclick="window.setShowRestart(this)">${window.config_sysOverhaulShowRestart? "✔": "✖"}</p>
+                    <hr>
+
+                    <h4><span style="color: blue">Debug:</span><br>
+                    Carregar Script localmente</h4>
                     <p class="clickableButton" onclick="window.setLoadLocalScript(this)">${window.config_sysOverhaulSavedData? "✔": "✖"}</p>
                     <hr>
 
-                    <h4><span style="color: #bbbbbb">Client:</span> Atualizar Cliente<br>
-                    (ao atualizar é nescessário reiniciar o sistema)</h4>
+                    <h4><span style="color: blue">Debug:</span><br>
+                    Live Reload do script<br>
+                    <i>(ao carregar script localmente)</i></h4>
+                    <p class="clickableButton ${!window.config_sysOverhaulSavedData? " nointeraction": ""}"
+                       title='"Debug: Carregar Script localmente" precisa estar ativado.'
+                       id="sysOverhaulLiveReloadButton"
+                       onclick="window.setLiveReload(this)">${window.config_sysOverhaulLiveReload? "✔": "✖"}</p>
+                    <hr>
+
+                    <h4><span style="color: #bbbbbb">Client:</span><br>
+                    Atualizar Cliente<br>
+                    <i>(ao atualizar é nescessário reiniciar o sistema)</i></h4>
                     <p class="clickableButton" onclick="window.open('https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/main/client.user.js')">
                         <img class="insertHtmlIcon" src="https://cdn-icons-png.flaticon.com/512/45/45162.png">
                     </p>
@@ -248,26 +385,29 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
 var placeHtml = true;
 var placeHtmlMain = true;
 
-setInterval(() => {
+customInterval(() => {
     try {
+        // Whatsapp web app injection
         if(document.location.href.includes("whatsapp") && !document.location.href.includes("send")){
             var container = document.getElementsByClassName("_2Nr6U");
 
+            // selectable contact number
             var number = document.querySelector("#main > header > div._24-Ff > div");
             if(number){
                 number.style.userSelect = "all";
             }
 
+            // close if another is open
             if(container[0].innerHTML == "O WhatsApp está aberto em outra janela. Clique em “Usar aqui” para usar o WhatsApp nesta janela."){
                 window.close();
             }
 
+        // Whatsapp question close
         } else if(document.location.href.includes("whatsapp") && document.location.href.includes("send")) {
             window.close();
 
-        } else {
+        } else if(document.location.href.includes("ambiente_loja")) {
             // trocar foto do forms (TEMPORARIO)
-            // eslint-disable-next-line
             Array.from(document.querySelectorAll("img"))
                 .filter(e => e.src=="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRILNUIbumbGrgxoPQjPIu1aipobctMvwt7NQ&usqp=CAU")
                 .forEach(e => e.src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Google_Forms_logo_%282014-2020%29.svg/1489px-Google_Forms_logo_%282014-2020%29.svg.png");
@@ -301,7 +441,7 @@ setInterval(() => {
 
             /*
                 if: Main System
-                else: Pedido
+                else: Pedido - iframe
             */
             if(window.location == window.parent.location){
                 window.sysOverhaul = {
@@ -314,7 +454,7 @@ setInterval(() => {
                     var style = document.createElement("style");
                         style.innerHTML = `.sysUpdateMarkedAsUpdated { background: #03315e !important; }`;
                     
-                    document.body.append(style);
+                    customAppend(style);
                 }
 
 
@@ -392,7 +532,7 @@ setInterval(() => {
                                         iframe.id = id;
                                         iframe.style.display =  "none";
 
-                                    document.body.append(iframe);
+                                    customAppend(iframe);
 
                                     /* document.getElementById("sysOverhaulIframeExecuteOrderChange").src = linkString; */
                                 }
@@ -450,6 +590,14 @@ setInterval(() => {
                                 cursor: pointer;
                                 user-select: none;
                             }
+                            .clickableButton.hidden {
+                                display: none;
+                            }
+                            .clickableButton.nointeraction {
+                                opacity: .5;
+                                user-select: none;
+                                cursor: not-allowed;
+                            }
                             #contentDisplayContainer {
                                 white-space: nowrap;
                                 background: white;
@@ -462,6 +610,7 @@ setInterval(() => {
                                 right: 75px;
                                 overflow: auto;
                                 width: 0px;
+                                max-height: 87vh;
                                 opacity: 0;
                                 transition: width 1s, opacity 1s;
                                 z-index: 2;
@@ -571,6 +720,7 @@ setInterval(() => {
 
                             <div id="driveDisplayContainer" style="${window.config_ActiveDriveContainerBlur?"":"filter: blur(0px)"}">
                                 <!-- Não funcionam por causa da origem diferente do iframe 😥, mas ficou tão legal que vou deixar ai de enfeite -->
+                                <!-- Acho que descobri um jeito de fazer funcionar, usando evento postmessage, mas ainda vou testar -->
                                 <div class="contentDisplayHistoryButtons" title="Não funcionam por causa da origem diferente do iframe 😥, mas ficou tão legal que vou deixar ai de enfeite">
                                     <p class="clickableButton" onclick="document.querySelector('.contentDisplayIframe').contentWindow.history.back()">←</p>
                                     <p class="clickableButton" onclick="document.querySelector('.contentDisplayIframe').contentWindow.history.forward()">→</p>
@@ -582,11 +732,21 @@ setInterval(() => {
                             </div>
                             
                             <div class="sideButtonsContainer">
-                            <p class="clickableButton" onclick="window.openContentInDisplay(this.innerHTML)">Dados do pedido</p>
-                                <p class="clickableButton" onclick="apex.regions['R123756118202154357494'].refresh();">Recarregar lista</p>
+                                <p class="clickableButton" onclick="window.openContentInDisplay(this.innerHTML)">Dados do pedido</p>
+
+                                <p class="clickableButton" onclick="apex.regions['R123756118202154357494'].refresh();" title="Recarregar Lista">
+                                    <img class="driveIcon" src="https://cdn-icons-png.flaticon.com/512/126/126502.png">
+                                </p>
+
+                                <p class="clickableButton ${!window.config_sysOverhaulShowRestart? " hidden": ""}" id="sysOverHaulReloadScripButton" onclick="window.sysOverhaulLoadScript()">
+                                    Recarregar script <br>
+                                    <img class="driveIcon" src="https://cdn-icons-png.flaticon.com/512/126/126502.png">
+                                </p>
+
                                 <p class="clickableButton" onclick="document.querySelector('#driveDisplayContainer').classList.toggle('show'); this.style.opacity=''">
                                     <img class="driveIcon" src="https://cdn-icons-png.flaticon.com/512/5968/5968523.png">
                                 </p>
+
                                 <p class="clickableButton" onclick="window.openContentInDisplay(this.innerHTML)">⚙</p>
                             </div>
                         </div>
@@ -698,7 +858,8 @@ setInterval(() => {
                             </div>
                         `;
 
-                    document.body.append(div, contextmenu);
+                    customAppend(div);
+                    customAppend(contextmenu);
 
                     addEventListener("click", (evt)=>{
                         var placeholders = ["Status Especial", "Observações", "Local de Amazenamento"];
@@ -753,8 +914,8 @@ setInterval(() => {
                                 var createdCustomOpt = document.createElement("option");
                                     createdCustomOpt.innerHTML = "Status Customizado"; 
                                     createdCustomOpt.value = data.status;
-    
-                                    document.getElementById(pType+"_SITUACAO_DESIGN").append(createdCustomOpt);
+
+                                    customAppend(createdCustomOpt, document.getElementById(pType+"_SITUACAO_DESIGN"));
                                     document.querySelector("#"+pType+"_SITUACAO_DESIGN").value = data.status;
                             }
                         }
@@ -843,8 +1004,8 @@ setInterval(() => {
                         localStorage.setItem("savedData_orderStates", JSON.stringify(window.parent.savedData_orderStates));
 
 
-                        document.getElementById(pType+"_SITUACAO_DESIGN").parentNode.append(document.createElement("br"));
-                        document.getElementById(pType+"_SITUACAO_DESIGN").parentNode.append(div2);
+                        customAppend(document.createElement("br"), document.getElementById(pType+"_SITUACAO_DESIGN").parentNode);
+                        customAppend(div2, document.getElementById(pType+"_SITUACAO_DESIGN").parentNode);
                         document.getElementById(pType+"_SITUACAO_DESIGN_LABEL").innerHTML = "";
 
 
@@ -856,7 +1017,7 @@ setInterval(() => {
                             divHoldClass.id = "insertCustomUserScriptElements";
                         divRow.append(divHoldClass);
 
-                        document.getElementsByClassName("container")[1].append(divRow);
+                        customAppend(divRow, document.getElementsByClassName("container")[1]);
 
 
                         var insertEls = document.getElementById("insertCustomUserScriptElements");
@@ -879,7 +1040,7 @@ setInterval(() => {
                                     createdCustomOpt.innerHTML = "Status Customizado";
                                     createdCustomOpt.id = "specialStatusValue";
     
-                                    document.getElementById(pType+"_SITUACAO_DESIGN").append(createdCustomOpt);
+                                    customAppend(createdCustomOpt, document.getElementById(pType+"_SITUACAO_DESIGN"));
     
                                     customOpt = document.getElementById("specialStatusValue");
                                 }
@@ -888,8 +1049,8 @@ setInterval(() => {
                                 document.getElementById(pType+"_SITUACAO_DESIGN").value = customOpt.value;
                             });
 
-                        insertEls.append(ipt);
-                        insertEls.append(btn);
+                        customAppend(ipt, insertEls);
+                        customAppend(btn, insertEls);
 
                         var removeNameButtonFunction = () => {
                             document.getElementById(pType+"_PROFISSIONAL"+(pType[1]=="4"?"2":"")).value = "";
@@ -901,7 +1062,7 @@ setInterval(() => {
                             removeNameButton.innerHTML = "Remover Nome";
                             removeNameButton.addEventListener("click", removeNameButtonFunction);
 
-                        insertEls.append(removeNameButton);
+                        customAppend(removeNameButton, insertEls);
 
                     }
                 }
@@ -910,19 +1071,3 @@ setInterval(() => {
         }
     } catch { /* ignore errors */ }
 }, 500);
-
-
-
-
-// PARA CHECAR SE ESTA CARREGANDO
-
-/* 
-<span class="u-Processing" role="alert" style="top: 541.5px; left: 779.43px; background: black; color: white;">
-    <span class="u-Processing-spinner" style="background: black; color: white;">
-    </span>
-
-    </span><span class="u-VisuallyHidden" style="background: black; color: white;">
-        Processando
-    </span>
-</span>
-*/
