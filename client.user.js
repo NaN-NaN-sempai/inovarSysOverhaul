@@ -63,6 +63,8 @@ window.sysOverhaulLoadScript = async () => {
         spinner.remove();
 
     } catch (err) {
+        spinner.remove();
+
         if(err == "TypeError: Failed to fetch" && loadLocal){
             let text = 'Ocorreu um erro ao carregar o Script "Inovar Overhaul - Server" localmente.\n\nDeseja voltar a carregar do GitHub?';
 
@@ -73,8 +75,6 @@ window.sysOverhaulLoadScript = async () => {
                 }
             }
 
-            spinner.remove();
-
             if(window.apex){
                 window.apex.message.confirm(text, confimation);
             } else {
@@ -84,8 +84,6 @@ window.sysOverhaulLoadScript = async () => {
         } else {
             console.log(err);
             var text = 'Ocorreu um erro ao carregar o Script "Inovar Overhaul - Server":\n\n'+err;
-
-            spinner.remove();
 
             if(window.apex){
                 window.apex.message.alert(text);
