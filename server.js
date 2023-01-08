@@ -24,7 +24,7 @@
 */
 
 
-window.sysOverhaulClientWantedVersion = 1;
+window.sysOverhaulClientWantedVersion = 2;
 
 if(window.sysOverhaulClientWantedVersion != window.sysOverhaulClientVersion) {
     var text = 'Existe uma nova versão do "Inovar Overhaul - Client", deseja atualizar?\n\nFicar com uma versão desatualizada pode causar erros.\n\nQuando atualizar será nescessário reiniciar a página do sistema.';

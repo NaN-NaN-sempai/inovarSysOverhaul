@@ -28,7 +28,7 @@
 
 
 
-window.sysOverhaulClientVersion = 1;
+window.sysOverhaulClientVersion = 2;
 window.sysOverhaulLoadScript = async () => {
     var forceLoadLocal = false;
     /* forceLoadLocal faz o script carregar localmente (usando servidor http, no caso eu usei o live server mesmo) ao invez do github, serve para editar o script */
@@ -51,11 +51,16 @@ window.sysOverhaulLoadScript = async () => {
 
     var fetchLocation = loadLocal? localScriptLocation: gitHubLocation;
 
+    var spinner = window.apex?
+                    window.apex.util.showSpinner():
+                    {remove: ()=>{}};
+
     try {
         var getPromisse = await fetch(fetchLocation);
         var getScript = await getPromisse.text();
         /* eslint no-eval: 0 */
         eval(getScript);
+        spinner.remove();
 
     } catch (err) {
         if(err == "TypeError: Failed to fetch" && loadLocal){
@@ -68,14 +73,19 @@ window.sysOverhaulLoadScript = async () => {
                 }
             }
 
+            spinner.remove();
+
             if(window.apex){
                 window.apex.message.confirm(text, confimation);
             } else {
                 confimation(confirm(text));
             }
+
         } else {
             console.log(err);
             var text = 'Ocorreu um erro ao carregar o Script "Inovar Overhaul - Server":\n\n'+err;
+
+            spinner.remove();
 
             if(window.apex){
                 window.apex.message.alert(text);
