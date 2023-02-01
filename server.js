@@ -308,7 +308,24 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
                                   "Nem um pedido selecionado.<br>Pressione o botão direito no link de contato de algum pedido para ver os dados do pedido.":
                                   window.orderDataHolder;
 
-            } else {
+            } else if(checkContent == "Usuario") {
+                showContent = /* html */ `
+                    <h3>Em desenvolvimento...</h3> <br>
+                    
+                    <h4><span style="color: grey">Ativado:</span><br>
+                    <p class="clickableButton" onclick="">✖</p>
+                    
+                    <br>
+
+                    <h4><span style="color: grey">Nome de usuário:</span><br>
+                    <input placeholder="Nome de usuario" value="${apex.env.APP_USER}" />
+                    
+                    <br> <br>
+                    
+                    <p class="clickableButton" onclick="">Aplicar</p>
+                `;
+
+            } else if(checkContent == "Configuracao") {
                 
                 // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
                 showContent = /* html */ `
@@ -434,6 +451,10 @@ customInterval(() => {
                 .forEach(e=>{
                         var goToWhatsappQuestion = (!window.config_ReplaceWhatsapp2? "web": "api");
 
+                        // trocar nome no link
+                        //e.href = e.href.replace(/(?<=chamo%20).*(?=,%20fa%)/gm, "TESTE");
+
+                        // link whatsapp
                         e.href = window.config_ReplaceWhatsapp?
                             (e.href.includes("whatsapp://")?
                                  e.href:
@@ -607,7 +628,7 @@ customInterval(() => {
                                 user-select: none;
                             }
                             .clickableButton:hover {
-                                outline: 4px #B3B0BE solid;
+                                outline: 4px #474747 solid;
                                 outline-offset: -2px;
                             }
                             .clickableButton.hidden {
@@ -756,6 +777,10 @@ customInterval(() => {
                                     <img class="driveIcon" src="data:image/png;base64,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">
                                 </p>
 
+                                <p class="clickableButton" onclick="window.openContentInDisplay('Usuario')" title="Usuario">
+                                    <img class="driveIcon" src="https://assets.stickpng.com/images/585e4bf3cb11b227491c339a.png">
+                                </p>
+
                                 <p class="clickableButton" onclick="apex.regions['R123756118202154357494'].refresh();" title="Recarregar Lista de Pedidos">
                                     <img class="driveIcon" src="https://cdn-icons-png.flaticon.com/512/126/126502.png">
                                 </p>
@@ -768,7 +793,7 @@ customInterval(() => {
                                     <img class="driveIcon" src="https://cdn-icons-png.flaticon.com/512/5968/5968523.png">
                                 </p>
 
-                                <p class="clickableButton" onclick="window.openContentInDisplay('⚙')" title="Configuraçõe  s do Script">
+                                <p class="clickableButton" onclick="window.openContentInDisplay('Configuracao')" title="Configuraçõe  s do Script">
                                     <img class="driveIcon" src="https://www.pngfind.com/pngs/m/236-2361704_png-file-svg-configuration-file-icon-free-transparent.png">
                                 </p>
                             </div>
