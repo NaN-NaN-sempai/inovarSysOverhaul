@@ -25,50 +25,56 @@
 
 
 window.sysOverhaulClientWantedVersion = 2;
+// ^^ Versão desejada do Client, para checar se existem atualizações do cliente
 
+
+
+
+
+
+// Checar o site em que o script esta sendo executado
+window.getRunningLocation = () => {
+    if(document.location.href.includes("ambiente_loja") && window.location != window.parent.location) return "sistema";
+    if(document.location.href.includes("ambiente_loja") && window.location == window.parent.location) return "pedido";
+    if(document.location.href.includes("whatsapp")) return "whatsapp";
+
+    return "não registrado";
+}
+window.runningLocationIs = (wantedLocation) => getRunningLocation() == wantedLocation;
+window.runningLocationIsAny = (...wantedLocations) => wantedLocations.includes(getRunningLocation());
+
+
+
+
+
+// Sobreescrever metodos 'confirm' e 'alert' 
+window.iovhlAuxConfirm = window.iovhlAuxConfirm == undefined? confirm: window.iovhlAuxConfirm;
+if(runningLocationIsAny("sistema", "pedido")){
+    window.alert = (text) => apex.message.alert(text);
+
+    window.confirm = (text, callBack = ()=>{}) => {
+        apex.message.confirm(text, callBack);
+    }
+
+} else {
+    window.alert = (text) => window.iovhlAuxAlert(text); 
+
+    window.confirm = (text, callBack = ()=>{}) => {
+        if(window.iovhlAuxConfirm(text)) callBack();
+    }
+}
+
+
+// Checar se existe nova versão
 if(window.sysOverhaulClientWantedVersion != window.sysOverhaulClientVersion) {
-    var text = 'Existe uma nova versão do "Inovar Overhaul - Client", deseja atualizar?\n\nFicar com uma versão desatualizada pode causar erros.\n\nQuando atualizar será nescessário reiniciar a página do sistema.';
+    var text = 'Existe uma nova versão do "Inovar Overhaul - Client"\n\nFicar com uma versão desatualizada pode causar erros.\n\nVersão atual: '+window.sysOverhaulClientVersion+'\nVersão disponível: '+window.sysOverhaulClientWantedVersion+'\n\nDeseja atualizar?\nSerá nescessário reiniciar a página do sistema.';
 
     var callBack = (c) => {
         if(c) window.open('https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/main/client.user.js');
     }
 
-    if(!document.location.href.includes("whatsapp") && document.location.href.includes("ambiente_loja")){
-        apex.message.confirm(text, callBack);
-        
-    } else {
-        var confirmation = confirm(text);
-        callBack(confirmation);
-    }
+    confirm(text, callBack);
 }
-
-
-
-
-
-
-
-window.iovhlAuxConfirm = window.iovhlAuxConfirm == undefined? confirm: window.iovhlAuxConfirm;
-window.confirm = (text, callBack = ()=>{}) => {
-    if(!document.location.href.includes("whatsapp") && document.location.href.includes("ambiente_loja")){
-        apex.message.confirm(text, callBack);
-        
-    } else {
-        var confirmation = window.iovhlAuxConfirm(text);
-        callBack(confirmation);
-    }
-}
-window.iovhlAuxAlert = window.iovhlAuxAlert == undefined? alert: window.iovhlAuxAlert;
-window.alert = (text) => {
-    if(!document.location.href.includes("whatsapp") && document.location.href.includes("ambiente_loja")){
-        apex.message.alert(text);
-        
-    } else {
-        window.iovhlAuxAlert(text); 
-    }
-}
-
-
 
 
 
@@ -88,17 +94,13 @@ const customInterval = (func, milliseconds) => {
     return interval;
 }
 
-document.querySelectorAll("[data-remove-indentificator]")?.forEach(e => e.remove());
+document.querySelectorAll("[data-inovar-sys-remove-identificator]")?.forEach(e => e.remove());
 const customAppend = (e, sel = document.body) => {
-    e.dataset.removeIndentificator = "true";
+    e.dataset.inovarSysRemoveIdentificator = "true";
  
     sel.append(e);
 }
 
-
-
-
-window.getLocation = () => {}
 
 
 
@@ -254,8 +256,8 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
 
         element.innerHTML = thisBool? "✔": "✖";
 
-        apex.message.alert('Carregando Script "Inovar Overhaul - Server" '+ (thisBool? "localmente": "do GitHub") + ".");
-/* 
+        alert('Carregando Script "Inovar Overhaul - Server" '+ (thisBool? "localmente": "do GitHub") + ".");
+        /* 
         if(!thisBool) localStorage.config_sysOverhaulLiveReload = false; */
         //location.reload();
         window.sysOverhaulLoadScript();
@@ -314,7 +316,7 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
             document.getElementById("sysOverhaulLiveReloadIframe").remove();
         }
 
-        apex.message.alert("Live Reload do Script " + (thisBool? "ativado": "desativado") + ".");
+        alert("Live Reload do Script " + (thisBool? "ativado": "desativado") + (thisBool? " ✔": "."));
     }
 
     // config: Ativar Blur da aba do Google Drive
@@ -478,6 +480,37 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
             return title + showContent;
         }
 
+        var animationDuration =  700;
+        var executeAnimation = () => display.animate(
+            [
+                {
+                    transform: "rotateY(0) translateX(0px)",
+                    width: "500px",
+                    opacity: 1
+                },
+                {
+                    transform: "rotateY(-90deg) translateX(45px)",
+                    width: 0,
+                    opacity: 0
+                },
+                {
+                    transform: "rotateY(-90deg) translateX(45px)",
+                    width: 0,
+                    opacity: 0
+                },
+                {
+                    transform: "rotateY(0) translateX(0px)",
+                    width: "500px",
+                    opacity: 1
+                }
+            ],
+            {
+                duration: animationDuration,
+                iterations: 1,
+                easing: "ease"
+            }
+        );
+
         if(!display.classList.contains("show") || forceShow){
             display.classList.add("show");
             display.innerHTML = insertContent(content);
@@ -487,7 +520,10 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
                 display.classList.remove("show");
 
             } else {
-                display.innerHTML = insertContent(content);
+                executeAnimation();
+                setTimeout(() => {
+                    display.innerHTML = insertContent(content);
+                }, animationDuration/3);
             }
         }
         window.openContentInDisplayLastChoice = content;
@@ -698,6 +734,7 @@ customInterval(() => {
                     div.innerHTML = /* html */ `
                         <style>
                             .insertHtmlMainContainer {
+	                            perspective: 2000px;
                                 z-index: 1000;
                                 position: fixed;
                                 right: 5px;
@@ -716,6 +753,11 @@ customInterval(() => {
                             .clickableButton:hover {
                                 outline: 4px #76768a solid;
                                 outline-offset: -2px;
+                            }
+                            .sideButtonsContainer {
+                                position: relative;
+                                background: transparent !important;
+                                right: 20px;
                             }
                             .sideButtonsContainer .clickableButton img {
                                 transform: rotate(0deg);
@@ -745,7 +787,7 @@ customInterval(() => {
                                 padding-right: 10px;
                                 padding-bottom: 10px;
                                 position: absolute;
-                                right: 75px;
+                                right: 100px;
                                 overflow: auto;
                                 width: 0px;
                                 max-height: 87vh;
@@ -766,6 +808,7 @@ customInterval(() => {
                             #contentDisplayContainer::-webkit-scrollbar {
                                 width: 16px;
                             }
+                            @keyframes contentDisplayContainerReload { 100% { transform:rotate(360deg); } }
                             .selectableText {
                                 user-select: all;
                             }
@@ -776,7 +819,7 @@ customInterval(() => {
                                 bottom: 30px; 
                                 width: 0px;
                                 height: 0px;
-                                z-index: 1;
+                                z-index: 999;
                                 white-space: nowrap;
                                 background: white;
                                 padding: 0;
@@ -850,23 +893,34 @@ customInterval(() => {
                             .insertHtmlIcon {
                                 height: 13px;
                             }
+                            /* ===== Scrollbar CSS ===== */
+                            html {
+                                overflow-y: overlay;
+                            }
+                            /* Firefox */
+                            * {
+                                scrollbar-width: auto;
+                                scrollbar-color: #000000 black;
+                            }
+
+                            /* Chrome, Edge, and Safari */
+                            body::-webkit-scrollbar {
+                                width: 12px;
+                            }
+                            body::-webkit-scrollbar-track {
+                                background: transparent;
+                            }
+                            body::-webkit-scrollbar-thumb {
+                                background-color: #000000;
+                                border-radius: 20px 0 0 20px;
+                                outline: 2px solid white;
+                                border-top: 5px solid white;
+                                border-bottom: 5px solid white;
+                            }
                         </style>
                         <div class="insertHtmlMainContainer">
                             <div id="contentDisplayContainer">
                                 Carregando...
-                            </div>
-
-                            <div id="driveDisplayContainer" style="${window.config_ActiveDriveContainerBlur?"":"filter: blur(0px)"}">
-                                <!-- Não funcionam por causa da origem diferente do iframe 😥, mas ficou tão legal que vou deixar ai de enfeite -->
-                                <!-- Acho que descobri um jeito de fazer funcionar, usando evento postmessage, mas ainda vou testar -->
-                                <div class="contentDisplayHistoryButtons" title="Não funcionam por causa da origem diferente do iframe 😥, mas ficou tão legal que vou deixar ai de enfeite">
-                                    <p class="clickableButton" onclick="document.querySelector('.contentDisplayIframe').contentWindow.history.back()">←</p>
-                                    <p class="clickableButton" onclick="document.querySelector('.contentDisplayIframe').contentWindow.history.forward()">→</p>
-                                    <p class="clickableButton" onclick="document.querySelector('.contentDisplayIframe').contentWindow.location.reload(true)">
-                                        <img class="insertHtmlIcon" src="https://cdn-icons-png.flaticon.com/512/126/126502.png">
-                                    </p>
-                                </div>
-                                <iframe class="contentDisplayIframe" src="https://drive.google.com/drive/u/0/starred"></iframe>
                             </div>
                             
                             <div class="sideButtonsContainer">
@@ -894,6 +948,19 @@ customInterval(() => {
                                     <img class="driveIcon" src="data:image/png;base64,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">
                                 </p>
                             </div>
+                        </div>
+
+                        <div id="driveDisplayContainer" style="${window.config_ActiveDriveContainerBlur?"":"filter: blur(0px)"}">
+                            <!-- Não funcionam por causa da origem diferente do iframe 😥, mas ficou tão legal que vou deixar ai de enfeite -->
+                            <!-- Acho que descobri um jeito de fazer funcionar, usando evento postmessage, mas ainda vou testar -->
+                            <div class="contentDisplayHistoryButtons" title="Não funcionam por causa da origem diferente do iframe 😥, mas ficou tão legal que vou deixar ai de enfeite">
+                                <p class="clickableButton" onclick="document.querySelector('.contentDisplayIframe').contentWindow.history.back()">←</p>
+                                <p class="clickableButton" onclick="document.querySelector('.contentDisplayIframe').contentWindow.history.forward()">→</p>
+                                <p class="clickableButton" onclick="document.querySelector('.contentDisplayIframe').contentWindow.location.reload(true)">
+                                    <img class="insertHtmlIcon" src="https://cdn-icons-png.flaticon.com/512/126/126502.png">
+                                </p>
+                            </div>
+                            <iframe class="contentDisplayIframe" src="https://drive.google.com/drive/u/0/starred"></iframe>
                         </div>
                     `;
                     // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ 
