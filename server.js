@@ -20,7 +20,7 @@
 
     dialogs:
     apex.message.alert("my text");
-    apex.message.confirm("my text");
+    apex.message.confirm("my text", callbackFunction);
 */
 
 
@@ -41,6 +41,37 @@ if(window.sysOverhaulClientWantedVersion != window.sysOverhaulClientVersion) {
         callBack(confirmation);
     }
 }
+
+
+
+
+
+
+
+window.iovhlAuxConfirm = window.iovhlAuxConfirm == undefined? confirm: window.iovhlAuxConfirm;
+window.confirm = (text, callBack = ()=>{}) => {
+    if(!document.location.href.includes("whatsapp") && document.location.href.includes("ambiente_loja")){
+        apex.message.confirm(text, callBack);
+        
+    } else {
+        var confirmation = window.iovhlAuxConfirm(text);
+        callBack(confirmation);
+    }
+}
+window.iovhlAuxAlert = window.iovhlAuxAlert == undefined? alert: window.iovhlAuxAlert;
+window.alert = (text) => {
+    if(!document.location.href.includes("whatsapp") && document.location.href.includes("ambiente_loja")){
+        apex.message.alert(text);
+        
+    } else {
+        window.iovhlAuxAlert(text); 
+    }
+}
+
+
+
+
+
 
 
 var sysOverhaulIntervalList = JSON.parse(localStorage.sysOverhaulIntervalList || "[]");
@@ -66,6 +97,8 @@ const customAppend = (e, sel = document.body) => {
 
 
 
+
+window.getLocation = () => {}
 
 
 
@@ -238,7 +271,7 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
         document.getElementById("sysOverHaulReloadScripButton").classList.toggle("hidden", !thisBool);
     }
 
-    // config: Mostrar botão para reiniciar script
+    // config: Ativar live-reload
     injectionLSHandler("config_sysOverhaulLiveReload");
     var createLiveReloadIframe = () => {
         
@@ -294,13 +327,35 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
         document.querySelector('#driveDisplayContainer').style.filter = thisBool? "": "blur(0px)";
     }
 
+    // user: Ativar usuario customizado
+    if(localStorage.user_UseCustomUsername_Name == undefined) localStorage.setItem("user_UseCustomUsername_Name", apex.env.APP_USER);
+    injectionLSHandler("user_UseCustomUsername");
+    window.setUseCustomUsername = (element) => {
+        var thisBool = injectionLSReverse("user_UseCustomUsername");
+
+        element.innerHTML = thisBool? "✔": "✖";
+        document.querySelector("#user_UseCustomUsername").classList.toggle("disabled", !thisBool)
+        
+        document.querySelector("#user_UseCustomUsername .disabled input").value = thisBool? localStorage.user_UseCustomUsername_Name: apex.env.APP_USER;
+    }
+    window.setUseCustomUsernameValue = () => {
+        var newName = document.querySelector("#user_UseCustomUsername_NameInput").value;
+        var hasIllegalChars = !(/^[A-Za-z0-9]*$/gm.test(newName));
+
+        if(hasIllegalChars) return alert("O nome digitado contem caracteres especiais não suportados.\n\nPor favor, digite outro seguindo as seguintes regars:\n\n [a-z, A-Z, 0-9]");
+
+        localStorage.setItem("user_UseCustomUsername_Name", newName);
+        document.querySelector("#user_UseCustomUsername .disabled input").value = newName;
+        alert("Novo nome de usuário aplicado com sucesso!");
+    }
+
 
     window.openContentInDisplayLastChoice = undefined;
     window.openContentInDisplay = (content, forceShow) => {
         var display = document.querySelector("#contentDisplayContainer");
 
         var insertContent = (checkContent) => {
-            var title = "<h3>"+checkContent+"</h3>";
+            var title = "<h3>"+checkContent+"</h3><hr>";
             var showContent = "";
 
             if(checkContent == "Dados do pedido"){
@@ -308,29 +363,60 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
                                   "Nem um pedido selecionado.<br>Pressione o botão direito no link de contato de algum pedido para ver os dados do pedido.":
                                   window.orderDataHolder;
 
-            } else if(checkContent == "Usuario") {
+            } else if(checkContent == "Usuário") {
                 showContent = /* html */ `
-                    <h3>Em desenvolvimento...</h3> <br>
+                    <h4><span style="color: grey">Ativar configurações de usuário:</span><br>
+                    <p class="clickableButton" onclick="window.setUseCustomUsername(this)">${window.user_UseCustomUsername? "✔": "✖"}</p>
                     
-                    <h4><span style="color: grey">Ativado:</span><br>
-                    <p class="clickableButton" onclick="">✖</p>
-                    
-                    <br>
+                    <style>
+                        #user_UseCustomUsername {
+                            margin-top: 10px;
+                            overflow: hidden;
+                        }
+                        #user_UseCustomUsername.disabled {
+                            opacity: 30%;
+                            cursor: not-allowed;
+                        }
+                        #user_UseCustomUsername.disabled * {
+                            pointer-events: none;
+                        }
+                        #user_UseCustomUsername input {
+                            border-radius: 100px;
+                            margin-left: 2px;
+                            padding-left: 15px;
+                            border: solid 1px white;
+                            outline: solid 1px black;
+                            outline-offset: 1px;
+                        }
+                        #user_UseCustomUsername .disabled {
+                            cursor: not-allowed;
+                        }
+                        #user_UseCustomUsername .disabled input {
+                            pointer-events: none;
+                        }
+                    </style>
 
-                    <h4><span style="color: grey">Nome de usuário:</span><br>
-                    <input placeholder="Nome de usuario" value="${apex.env.APP_USER}" />
-                    
-                    <br> <br>
-                    
-                    <p class="clickableButton" onclick="">Aplicar</p>
+                    <div id="user_UseCustomUsername" class="${window.user_UseCustomUsername? "": "disabled"}">
+                        <h4><span style="color: grey">Alterar nome de usuário:</span><br>
+                        <input id="user_UseCustomUsername_NameInput" placeholder="Insira um nome" value="${localStorage.user_UseCustomUsername_Name? localStorage.user_UseCustomUsername_Name : apex.env.APP_USER}" />
+                        
+                        <br> <br>
+                        
+                        <p class="clickableButton" style="margin-left: 5px" onclick="window.setUseCustomUsernameValue()">Aplicar</p>
+                        
+                        <br>
+
+                        <h4><span style="color: grey">Nome atual:</span><br>
+                        <div class="disabled" title="Inalterável">
+                            <input value="${window.user_UseCustomUsername? localStorage.user_UseCustomUsername_Name: apex.env.APP_USER}" />
+                        </div>
+                    </div>
                 `;
 
-            } else if(checkContent == "Configuracao") {
+            } else if(checkContent == "Configurações") {
                 
                 // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
                 showContent = /* html */ `
-                    <h3>Configurações</h3><hr>
-
                     <h4><span style="color: grey">Utils:</span><br>
                     Modo escuro</h4>
                     <p class="clickableButton" onclick="window.setDarkMode(this)">${window.config_DarkModeActive? "✔": "✖"}</p>
@@ -452,7 +538,7 @@ customInterval(() => {
                         var goToWhatsappQuestion = (!window.config_ReplaceWhatsapp2? "web": "api");
 
                         // trocar nome no link
-                        //e.href = e.href.replace(/(?<=chamo%20).*(?=,%20fa%)/gm, "TESTE");
+                        e.href = e.href.replace(/(?<=chamo%20).*(?=,%20fa%)/gm, window.user_UseCustomUsername? localStorage.user_UseCustomUsername_Name: apex.env.APP_USER);
 
                         // link whatsapp
                         e.href = window.config_ReplaceWhatsapp?
@@ -628,8 +714,19 @@ customInterval(() => {
                                 user-select: none;
                             }
                             .clickableButton:hover {
-                                outline: 4px #474747 solid;
+                                outline: 4px #76768a solid;
                                 outline-offset: -2px;
+                            }
+                            .sideButtonsContainer .clickableButton img {
+                                transform: rotate(0deg);
+                                transition: transform .1s;
+                                pointer-events: none;
+                            }
+                            .sideButtonsContainer .clickableButton:hover img {
+                                transform: rotate(5deg);
+                            }
+                            .sideButtonsContainer .clickableButton:active img {
+                                transform: rotate(-10deg);
                             }
                             .clickableButton.hidden {
                                 display: none;
@@ -777,7 +874,7 @@ customInterval(() => {
                                     <img class="driveIcon" src="data:image/png;base64,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">
                                 </p>
 
-                                <p class="clickableButton" onclick="window.openContentInDisplay('Usuario')" title="Usuario">
+                                <p class="clickableButton" onclick="window.openContentInDisplay('Usuário')" title="Usuário">
                                     <img class="driveIcon" src="https://assets.stickpng.com/images/585e4bf3cb11b227491c339a.png">
                                 </p>
 
@@ -793,8 +890,8 @@ customInterval(() => {
                                     <img class="driveIcon" src="https://cdn-icons-png.flaticon.com/512/5968/5968523.png">
                                 </p>
 
-                                <p class="clickableButton" onclick="window.openContentInDisplay('Configuracao')" title="Configuraçõe  s do Script">
-                                    <img class="driveIcon" src="https://www.pngfind.com/pngs/m/236-2361704_png-file-svg-configuration-file-icon-free-transparent.png">
+                                <p class="clickableButton" onclick="window.openContentInDisplay('Configurações')" title="Configurações do Script">
+                                    <img class="driveIcon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGUAAABiCAYAAABJeR13AAAACXBIWXMAAAsSAAALEgHS3X78AAALvElEQVR4nO1dC7BVVRn+vsMNEg0NCwMTJBQUn8hNLXOyDEwHUxmtFAxKmxADgwwtfGuYmilKgT2w0iFHHZhSeZjJYBalqGRFxSVBrDHxFgiScRP+5r/+Z9ps1j5nv8+++/DN7Jl799l7rX/vf6+1/veiiKCoINkXwMkAjgUwFEB/AO8E0MNIVuJ3pEA+AVTs7+0ANgP4G4DVAFYAWCoiq3J7TcqUoh0ABgCYZy9ICnL8DsAYZV7W76tQDAHwNgBXA3ijQMzwHzpyhmT5HgozfZF8L4AHARxXAHLq4Z8ARovIE1k0XgimkDwEwM8BKGOCoFNZG4D1AP4doxuxNqqoeNYR2LrSzUZrPwCH2N9B2AZgrIg8mOTZ3ZQ2fsrqb4uqa6rQRXwRgHMA9MqZrj0AnALgRwD+E0BfB4BRqffdYIaoJPWngAdeAuCwRn80Rud+AG60Eeqn83UAJ5aJKbcFMOS2PKScGPQeETCq/6EfWJdnCoA+9pX5H/D2ojHDR/dgABuzpLuRD3ej48GWFnGEOGj/ooN2FeP3S6P9SqAEkCFIdgdwoa8HlWYuFJE0NPSs8V0Aa319vB3ABWn02xCmABgB4F2+c3eLyF8bRE8kiEiHjXQ/Pp1G+41iyhm+/6uLe1fCvaZEenE4yYFJH6Il7o0kaSLtXjGY+1Hf/zpCOkgeGJeeAHgVRDGRtl1E/pu0YRF5g+RCAOd7Tus7+aBjaouE0EwhuTeAT5hCNRzAQI+1NikOSvogEbCd5DoATwL4mSqn+oJjtvWsjymK9yWmMISkoRbbOQC2FthImOTYpOKsmnhiSGFnOfqdman0RfJiAH8G8AUAPRN/AcWEzgCXqO+E5NUka9m7/NjiONc96VM6mUKyB8m5AGaZqNcMUFvXNQB+bc61MHBZc7slfVe7rCkmPajl85ga97UD+INZbLcGEFckeC3AakkYAmCQnfejFcAykqeJyJoYz+BqMxJ2YgrJAwD8EsD+jkY6TAy8S0SeKjgT6oKkMmYKgPEOgeVgfQ8kjxeRF3MnzrNo6Vz4VMCCqc6cwUU3f8Q0mQwy806Ql7F7jXtPdtzzvTQX+isBvN/BtzsBfEREVuf1oeQJsyJ8DMAdjm5V9J/eCKJgX4vLkfOTMo6OGl/+HQGGxv6NGClXOObVDQAm5f2RNBhTbE31QqXPy/Ikq2IW2/N855XjF4hIewFeVG4QEfXhj3XoH+NJ9nHQkYntUBvd16HwPC4iD+f7SooBEVlvMWdeqOJ8roNAF1PeTPog2ug7HOfvLt7ryhU/dXR2vONcu0msr6Spq6miM8wMa1Wok6mPiPjN0k0DkvqhPmwisb70p0XkhZovktzDInN2iEhbUqZo8NtvPOfWikhyS+duxEbFYWp5affrbCxc/pRQ0YckhzXQWNlWdsnwBJ/ysyikotXWQB/ImIyVyMPMkqF2rzk1rlOz/80mmbWk2P9uptjz6OL+WbODeVMwVPA5KOCemZ7r1Jv5JXWPp6XRx0HRzfV1QVKV5xEk7wHwMgD1IZ3kCPz+jL8tkvv6QooGWPDHiyS/QjL21B47cMLitlw6Th5YmaQPkhrwMRHAhDqR/lWMVa+kyE4pCuqV3dNxbW+b0qaSVFvabBHZFJXGWNNXVz4APB9jyjzRM231MNtgmPteA3CL+qjymL66Ml6LQfs3SA6yvzVm4d0h7+sF4FIAa0i6XCO7IMn01ZWhYacfiki/xnO1kWw3e2FUdA/7MbhGSleI5U2K+TGzwWgjJM4M80hYR2FTMkVENNjj8Zy7vSXshaVdU0i2kDzO/EUuLM6RnOUi4neeBaLMC/2XzdC6juTlJPfx/f5qjrR8O8rFpVzobXRcbP/2tbSFK0guAPCoBaZfkiNJ3qzkzlFsSuopFiA/TUR28nb69ZSHSqCHTGigCch1rLBk1oOteMNLvmumeekv3UhR04lNXUXCcEtWDcI4swJ0oozT12hLrUgKsTWp6oFcb2FYvax4z0gAZ9pUmBRDSbaKiPaTKGnoWnN/ZoWvicjLMdqelgI9ywBMFpHnA37X8/dZVoIaJa+KoOEHYZwxvxOx1hQAz2U8Dx8aYy05KWGfuiB/XYPBI/ar+ZuPJOz71WqIbNlE4hsS3KsmkDNEZLrFf4WGeUFPt0U8rvKtjP0kbPqKG7r/hFVfyAqvR2lXUxds1MeBMuEsEVka91ks1fw6kt1sOouDiZbZ0GmY6/IisekfcaeOb6ZIhzJlVUw6lLGDyzR9+fPyw0JLelyXFhE29bki+MOg08tZJqacau5YVx5iLcwVkc0p03I/gLhp4eeVhiki8oqITDVf+XRH4YEg3J8BLf+ylPA42LN0BkkR2SgiMyyvsV6QuvpUnsmIlKhMWWvT6DGl9TxqLDRJzY8fVeOy1VHF3wj4S4hLfw/gAft4VlYDM8ruDh5d5/e015IobStDjnZVbSqr6X6o1eSaUOfSvTIko17b24PKaJWGKSR7W0baOLPKhlGK0y7Q40W9akZHkvywiCzz/1CKhd6qH71g8b+tEawUvS2fPgu4koy80Hf/GMl7SR7p/0EyIipP9LRg6zg4M206SfZ0lM9yocVKta8kuYSkpo4nMt0PTqM4TA1ousO2MBfq5gAklwP4QIx+JpGcnbICeW5ASGsQaP6ZkSSvRwLTfdZR95FM9xaEHbevO1O0femHuiYBLVPLpDzOj2pZ9mAiyVNTomOGFYuIA3UffL9MZhZlyIKYt1fMk3hsEhpIqhg+NUETWq1icxKReEqCxTUM/h7jnh87ygeGRS+ThsaLyPwoN5oPRU0kX03gn+qwCn2dKE2IkX3x/vCdOD6NmWEzsky4+G0Ka+gPq22WSqNXDZnkXQCuT9CMfumTrfTHIqvVsspChDpMUx9oesjHVQlMofDaNj/NpQrGs8p3HQFfY0fBtpSqHrO9z1BG0/0G2+ajijctmHuM5ZUcauU7igL9SG710lJWK/FVpi+o336eL35sC0k1l1+UEy3LbWMcpefztt2HFwtctSpLF0scYoq7PadpSUdkD0+/uvacZkF3YqOk1U9f06XXWSp1KhsFhECLNw7MnFgLSS42IWF7NVTVi2ZMRJ1kEfB5QPW4s/39qJQoIgtFZImLhqZiCkkVZy/PuduJUW9otpFyvhUfiIpNVhxbYtx7gifVOxSajSlxzEJq0j9KRI6wdSBqVjGtLmVoJPGnXBayhEYW0F2Jno3R7s1mU9N0icND3jPH6krqWvCoWQymROw38kY3RU2FqHV8KqFITPPn1/N7aJJQX9+9R0egc52ZT3pHoa8py4DIW5hn2wOOsEj3rY5Lv+NPXBKRlZY0FIS1NiK15MdAEbnSIiZDI4messIWwEZgQxp9WojPY2ay38dCkiZbRvEWc1i58IAZIqvQhJ/71HXg0juigjZ9eUMsF4tIWl64LgfdO8YW5jWu8B+8dc0Ac6hpnfx7rPJT4n2+qmjx53jHFBlLAwvW+EGt57HtO2rtL5MIFUfF6TQya3cjASomYXjR28KHdqNBqAQk2YxpZoaQ7GX7WDamfwsY8BcHUxHuQH+9kGYByWcszlh9Ib+y48k89zWmabl+xWdG2f0qAYrlOY538cc8aaiYjX+Wg1mXkvR7yUoNkvsHlIG6Nc/npvLETNoahvoe3+/PWZVRl7ZbKug6YtXyhvueS5N7hmWY8bULOs0sFl3oiuzTeva/INmvlJww2AhxMUQZcVGeDOmEbz69KcCwtskMaweUbP3oZ7ugbnQ8sy7qkxpBF2WnotSdX80sT1U5P3ZYLfiHLCqwzSe57YgroVi1uCxBqziuG4weZXkpp9ew/10rItdkTJMbjq9Hif9WA83yRTjmNnQE1xjanzMvWzMxQ0f5bN1juJBMMca0xqwL3xUPtfiOaiQzQjFF/h/JfrZjX5GyjIynrbpd4B7BeR+7LPS1YPu0j7TN1YaY9OLdJ6TeYl2JGKzhba/6QQQujz43hL7wqtBRvVeNr2pCUu+g7kqnfhD9uzgA8D+aNIDAZDZI5wAAAABJRU5ErkJggg==">
                                 </p>
                             </div>
                         </div>
@@ -943,9 +1040,21 @@ customInterval(() => {
 
                     });
                 }
-            } else { 
-
+            } else {
                 if(placeHtml){
+
+                    if(localStorage.user_UseCustomUsername != undefined){
+                        var pType = document.querySelector(".t-Dialog")?.querySelector("input").id.slice(0,2).toUpperCase();
+
+                        if(localStorage.user_UseCustomUsername == "true"){
+                            document.getElementById(pType+"_PROFISSIONAL"+(pType[1]=="4"?"2":"")).value = localStorage.user_UseCustomUsername_Name;
+                        }
+                    }
+                    
+                    
+
+
+
                     if(window.parent.sysOverhaulContextChangeData != undefined){
                         console.log(window.parent.sysOverhaulContextChangeData);
 
