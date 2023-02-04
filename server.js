@@ -175,6 +175,8 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
         if(window.config_DarkModeActive){
             window.config_DarkModeInterval = customInterval(() => {
                 Array.from(document.querySelectorAll("*")).forEach(e => {
+                    if(e.classList.contains("ignoreDarkMode")) return;
+
                     if(e.id == "sysOverhaulLiveReloadIframe" || document.querySelector("body").ownerDocument.defaultView.origin == "http://localhost:5500") return;
 
                     if(e.className == "ui-widget-overlay ui-front") return;
@@ -357,7 +359,7 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
         var display = document.querySelector("#contentDisplayContainer");
 
         var insertContent = (checkContent) => {
-            var title = "<h3>"+checkContent+"</h3><hr>";
+            var title = '<div style="position: sticky; top: 0; background: white;"><h3>'+checkContent+'</h3><hr></div>';
             var showContent = "";
 
             if(checkContent == "Dados do pedido"){
@@ -479,6 +481,16 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
                     <p class="clickableButton" onclick="window.open('https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/main/client.user.js')">
                         <img class="insertHtmlIcon" src="https://cdn-icons-png.flaticon.com/512/45/45162.png">
                     </p>
+                    <hr>
+
+                    <h4><span style="color: #bbbbbb">Client:</span><br>
+                    Versão desejada para o Client</h4>
+                    <p>v. ${window.sysOverhaulClientWantedVersion}</p>
+                    <hr>
+
+                    <h4><span style="color: #bbbbbb">Client:</span><br>
+                    Versão atual do Client</h4>
+                    <p>v. ${window.sysOverhaulClientVersion}</p>
                 `;
                 // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
             }
@@ -765,15 +777,18 @@ customInterval(() => {
                                 background: transparent !important;
                                 right: 20px;
                             }
-                            .sideButtonsContainer .clickableButton img {
+                            .sideButtonsContainer .clickableButton * {
                                 transform: rotate(0deg);
                                 transition: transform .1s;
                                 pointer-events: none;
                             }
-                            .sideButtonsContainer .clickableButton:hover img {
+                            .sideButtonsContainer .clickableButton span {
+                                display: block;
+                            }
+                            .sideButtonsContainer .clickableButton:hover * {
                                 transform: rotate(5deg);
                             }
-                            .sideButtonsContainer .clickableButton:active img {
+                            .sideButtonsContainer .clickableButton:active * {
                                 transform: rotate(-10deg);
                             }
                             .clickableButton.hidden {
