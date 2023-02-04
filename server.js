@@ -40,8 +40,7 @@ window.getRunningLocation = () => {
 
     return "não registrado";
 }
-window.runningLocationIs = (wantedLocation) => getRunningLocation() == wantedLocation;
-window.runningLocationIsAny = (...wantedLocations) => wantedLocations.includes(getRunningLocation());
+window.runningLocationIs = (...wantedLocations) => wantedLocations.includes(getRunningLocation());
 
 
 
@@ -49,7 +48,7 @@ window.runningLocationIsAny = (...wantedLocations) => wantedLocations.includes(g
 
 // Sobreescrever metodos 'confirm' e 'alert' 
 window.iovhlAuxConfirm = window.iovhlAuxConfirm == undefined? confirm: window.iovhlAuxConfirm;
-if(runningLocationIsAny("sistema", "pedido")){
+if(runningLocationIs("sistema", "pedido")){
     window.alert = (text) => apex.message.alert(text);
 
     window.confirm = (text, callBack = ()=>{}) => {
