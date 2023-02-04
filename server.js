@@ -430,6 +430,12 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
                     <p class="clickableButton" onclick="window.setContextMenuNoRestart(this)">${window.config_sysOverhaulContextMenuNoRestart? "✔": "✖"}</p>
                     <hr>
 
+                    <h4><span style="color: grey">Utils:</span><br>
+                    Abrir link de impressão em nova aba sem dar foco à página<br>
+                    <i>(EM DESENVOLVIMENTO)</i></h4>
+                    <p class="clickableButton" onclick="">✖</p>
+                    <hr>
+
                     <h4><span style="color: green">Whatsapp:</span><br>
                     Abrir Whatsapp direto no aplicativo</h4>
                     <p class="clickableButton" onclick="window.setReplaceWhatsapp(this)">${window.config_ReplaceWhatsapp? "✔": "✖"}</p>
