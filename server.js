@@ -47,6 +47,7 @@ window.runningLocationIs = (...wantedLocations) => wantedLocations.includes(getR
 
 
 // Sobreescrever metodos 'confirm' e 'alert' 
+window.iovhlAuxAlert = window.iovhlAuxAlert == undefined? confirm: window.iovhlAuxAlert;
 window.iovhlAuxConfirm = window.iovhlAuxConfirm == undefined? confirm: window.iovhlAuxConfirm;
 if(runningLocationIs("sistema", "pedido")){
     window.alert = (text) => apex.message.alert(text);
@@ -352,6 +353,16 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
         alert("Novo nome de usuário aplicado com sucesso!");
     }
 
+    // user: Ativar usuario customizado
+    injectionLSHandler("config_sysOverhaulPrintDriveClick");
+    window.setPrintDriveClick = (element) => {
+        var thisBool = injectionLSReverse("config_sysOverhaulPrintDriveClick");
+
+        element.innerHTML = thisBool? "✔": "✖";
+
+        if(!thisBool) apex.regions['R123756118202154357494'].refresh();
+    }
+
 
     window.openContentInDisplayLastChoice = undefined;
     window.openContentInDisplay = (content, forceShow) => {
@@ -433,8 +444,7 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
 
                     <h4><span style="color: grey">Utils:</span><br>
                     Abrir link de impressão em nova aba sem dar foco à página<br>
-                    <i>(EM DESENVOLVIMENTO)</i></h4>
-                    <p class="clickableButton" onclick="">✖</p>
+                    <p class="clickableButton" onclick="window.setPrintDriveClick(this)">${window.config_sysOverhaulPrintDriveClick? "✔": "✖"}</p>
                     <hr>
 
                     <h4><span style="color: green">Whatsapp:</span><br>
@@ -579,6 +589,25 @@ customInterval(() => {
             window.close();
 
         } else if(document.location.href.includes("ambiente_loja")) {
+
+            Array.from(document.querySelectorAll(".fa.fa-folders.fa-2x")).forEach(e => {
+                var link = e.parentElement;
+                link.target = "_blank";
+
+                if(!window.config_sysOverhaulPrintDriveClick) return;
+
+                if(!link.dataset.insertedClickHandler){
+                    link.dataset.insertedClickHandler = true;
+
+                    link.addEventListener("click", () => {
+                        var list = link.parentElement.parentElement.children;
+
+                        list[tableGetCollumnIndex("Dialogar")]?.querySelector("a")?.click();
+                        console.log(list);
+                    });
+                }
+            });
+
             // trocar foto do forms (TEMPORARIO)
             Array.from(document.querySelectorAll("img"))
                 .filter(e => e.src=="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRILNUIbumbGrgxoPQjPIu1aipobctMvwt7NQ&usqp=CAU")
