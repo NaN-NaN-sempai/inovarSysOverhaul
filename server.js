@@ -24,7 +24,7 @@
 */
 
 
-window.sysOverhaulClientWantedVersion = 2;
+window.sysOverhaulClientWantedVersion = 3;
 // ^^ Versão desejada do Client, para checar se existem atualizações do cliente
 
 
@@ -442,9 +442,9 @@ if(runningLocationIs("sistema")){
                     <p class="clickableButton" onclick="window.setContextMenuNoRestart(this)">${window.config_sysOverhaulContextMenuNoRestart? "✔": "✖"}</p>
                     <hr>
 
-                    <h4><span style="color: grey">Utils:</span><br>
-                    Abrir links de impressão e Whatsapp juntos<br>
-                    <i>(ao clicar no link de impressão)</i></h4>
+                    <h4><span style="color: grey">Utils (Diagramação):</span><br>
+                    Abrir Extrato, Dialogar e Editar Pedido juntos<br>
+                    <i>(ao clicar em Extrato)</i></h4>
                     <p class="clickableButton" onclick="window.setPrintDriveClick(this)">${window.config_sysOverhaulPrintDriveClick? "✔": "✖"}</p>
                     <hr>
 
@@ -586,14 +586,18 @@ customInterval(() => {
                 window.close();
             }
 
-        // Whatsapp question close
-        } else if(runningLocationIs("whatsapp") && document.location.href.includes("send")) {
+        
+        } /* Whatsapp question close */
+        else if(runningLocationIs("whatsapp") && document.location.href.includes("send")) {
             window.close();
 
         } else if(runningLocationIs("sistema") || runningLocationIs("pedido")) {
 
-            Array.from(document.querySelectorAll(".fa.fa-folders.fa-2x")).forEach(e => {
-                var link = e.parentElement;
+            /* Abrir Extrato, Dialogar e Editar pedido clicando em Extrato */
+            [...document.querySelectorAll("img")]
+            .filter(e => e.src == "https://cdn-icons-png.flaticon.com/512/29/29587.png")
+            .forEach(e => {
+                var link = e.parentElement.parentElement;
                 link.target = "_blank";
 
                 if(!window.config_sysOverhaulPrintDriveClick) return;
@@ -603,9 +607,15 @@ customInterval(() => {
 
                     link.addEventListener("click", () => {
                         var list = link.parentElement.parentElement.children;
+                        list[tableGetCollumnIndex("Dialogar")]?.querySelector("a")?.click();
+                        
+                        var collumnEl = document.getElementById("C62756362434770112457_HDR").parentElement;
+                        var index = [...collumnEl.parentElement.children].indexOf(collumnEl)
 
-                        list[tableGetCollumnIndex("Extrato")]?.querySelector("a")?.click();
-                        console.log(list);
+                        var editOrder = link.parentElement.parentElement.children[index];
+
+                        editOrder.children[0].click();
+                        console.log(editOrder);
                     });
                 }
             });
@@ -908,42 +918,6 @@ customInterval(() => {
                                 background: transparent !important;
                                 border: 1px black solid;
                             }
-                            .contentDisplayHistoryButtons {
-                                display: flex;
-                                background: black;
-                                color: white;
-                                flex-direction: row;
-                                flex-wrap: nowrap;
-                                align-content: stretch;
-                                align-items: flex-start;
-                                justify-content: flex-start;
-                                position: absolute;
-                                top: -25px;
-                                left: 0;
-                                background: transparent !important;
-                            }
-                            .contentDisplayHistoryButtons .clickableButton {
-                                width: 30px;
-                                border-radius: 0;
-                                text-align: center;
-                                outline: 1px black solid;
-                                border: 0;
-                                cursor: pointer;
-                                user-select: none;
-                            }
-                            .contentDisplayHistoryButtons .clickableButton:nth-child(1) {
-                                border-radius: 50px 0 0 50px;
-                            }
-                            .contentDisplayHistoryButtons .clickableButton:nth-child(2) {
-                                border-radius: 0 50px 50px 0;
-                            }
-                            .contentDisplayHistoryButtons .clickableButton:nth-child(3) {
-                                border-radius: 50px;
-                                width: 20px;
-                            }
-                            .insertHtmlIcon {
-                                height: 13px;
-                            }
                             /* ===== Scrollbar CSS ===== */
                             html {
                                 overflow-y: overlay;
@@ -1001,16 +975,7 @@ customInterval(() => {
                             </div>
                         </div>
 
-                        <div id="driveDisplayContainer" style="${window.config_ActiveDriveContainerBlur?"":"filter: blur(0px)"}">
-                            <!-- Não funcionam por causa da origem diferente do iframe 😥, mas ficou tão legal que vou deixar ai de enfeite -->
-                            <!-- Acho que descobri um jeito de fazer funcionar, usando evento postmessage, mas ainda vou testar -->
-                            <div class="contentDisplayHistoryButtons" title="Não funcionam por causa da origem diferente do iframe 😥, mas ficou tão legal que vou deixar ai de enfeite">
-                                <p class="clickableButton" onclick="document.querySelector('.contentDisplayIframe').contentWindow.history.back()">←</p>
-                                <p class="clickableButton" onclick="document.querySelector('.contentDisplayIframe').contentWindow.history.forward()">→</p>
-                                <p class="clickableButton" onclick="document.querySelector('.contentDisplayIframe').contentWindow.location.reload(true)">
-                                    <img class="insertHtmlIcon" src="https://cdn-icons-png.flaticon.com/512/126/126502.png">
-                                </p>
-                            </div>
+                        <div id="driveDisplayContainer" style="${window.config_ActiveDriveContainerBlur?"":"filter: blur(0px)"}">                            
                             <iframe class="contentDisplayIframe" src="https://drive.google.com/drive/u/0/starred"></iframe>
                         </div>
                     `;
@@ -1343,27 +1308,122 @@ customInterval(() => {
                 }
 
             }
-        } else {
+        } else if(window.location != window.parent.location) {
             if(placeHtmlUrl){
                 placeHtmlUrl = false;
 
-                var urlBar = document.createElement("input");
-                    urlBar.id = "sysOverhaulUrlBar";
-                    urlBar.type = "text";
+                var div = document.createElement("div");
+                    div.id = "sysOverhaulUrlBarSim";
+                    div.className = "hide";
 
-                    urlBar.style.position="fixed";
-                    urlBar.style.zIndex = "9999999999999999999";
-                    urlBar.style.top = "10px";
-                    urlBar.style.right="50%";
+                    div.innerHTML = /* html */ `
+                        <style>
+                            #sysOverhaulUrlBarSim {
+                                position: fixed;
+                                z-index: 999999999999999999;
+                                top: 0;
+                                width: 100%;
+                                height: 42px;
+                                background: black;
+                                transition: top .5s;
+                            }
+                            #sysOverhaulUrlBarSim.hide {
+                                top: -42px;
+                            }
+                            #sysOverhaulUrlBarSim input {
+                                width: 100%;
+                            }
+                            
+                            #sysOverhaulUrlBarSim .contentDisplayHistoryButtons {
+                                display: flex;
+                                background: black;
+                                color: white;
+                                flex-direction: row;
+                                flex-wrap: nowrap;
+                                align-content: stretch;
+                                align-items: flex-start;
+                                justify-content: flex-start;
+                                position: relative;
+                                top: -10px;
+                                background: transparent !important;
+                            }
+                            
+                            #sysOverhaulUrlBarSim .contentDisplayHistoryButtons .clickableButton {
+                                width: 30px;
+                                border-radius: 0;
+                                text-align: center;
+                                outline: 1px black solid;
+                                border: 0;
+                                cursor: pointer;
+                                user-select: none;
+                            }
+                            #sysOverhaulUrlBarSim .contentDisplayHistoryButtons .clickableButton:nth-child(1) {
+                                border-radius: 50px 0 0 50px;
+                            }
+                            #sysOverhaulUrlBarSim .contentDisplayHistoryButtons .clickableButton:nth-child(2) {
+                                border-radius: 0 50px 50px 0;
+                            }
+                            #sysOverhaulUrlBarSim .contentDisplayHistoryButtons .clickableButton:nth-child(3) {
+                                border-radius: 50px;
+                                width: 20px;
+                            }
+                            #sysOverhaulUrlBarSim .clickableButton {
+                                background: white;
+                                color: black;
+                                width: 70px;
+                                border-radius: 10px;
+                                text-align: center;
+                                border: 1px black solid;
+                                cursor: pointer;
+                                user-select: none;
+                            }
+                            #sysOverhaulUrlBarSim .clickableButton:hover {
+                                outline: 4px #76768a solid;
+                                outline-offset: -2px;
+                            }
+                            #sysOverhaulUrlBarSim .insertHtmlIcon {
+                                height: 13px;
+                            }
+                            #sysOverhaulUrlBarSim .showUrlBarSim {
+                                opacity: .5;
+                                position: absolute;
+                                left: 50%;
+                                width: 30px;
+                                transform: translateX(-50%) rotate(180deg);
+                                bottom: -35px;
+                            }
+                            #sysOverhaulUrlBarSim .showUrlBarSim:hover {
+                                opacity: 1;
+                            }
+                            #sysOverhaulUrlBarSim .showUrlBarSim.hide {
+                                transform:  translateX(-50%);
+                            }
+                        </style>
+                        <div>
+                            <input type="text" value="${document.location}">
+                            <div class="contentDisplayHistoryButtons">
+                                <p class="clickableButton" onclick="history.back()">←</p>
+                                <p class="clickableButton" onclick="history.forward()">→</p>
+                                <p class="clickableButton" onclick="location.reload(true)">
+                                    <img class="insertHtmlIcon" src="https://cdn-icons-png.flaticon.com/512/126/126502.png">
+                                </p>
+                            </div>
+                            <p class="clickableButton showUrlBarSim hide" id="showUrlBarSimButton">↓</p>
+                        </div>
+                    `;
 
-                    urlBar.addEventListener("keyup", (e=>{
-                        console.log(e.key);
-                        if(e.key == "Enter"){
-                            document.location = urlBar.value
-                        }
-                    }))
+                document.body.append(div);
 
-                document.body.append(urlBar)
+                document.querySelector("#showUrlBarSimButton").addEventListener("click", e => {
+                    document.querySelector("#showUrlBarSimButton").classList.toggle("hide");
+                    document.querySelector("#sysOverhaulUrlBarSim").classList.toggle("hide");
+                    
+                });
+                document.querySelector("#sysOverhaulUrlBarSim input").addEventListener("keyup", e=>{
+                    if(e.key == "Enter"){
+                        document.location = urlBar.value;
+                    }
+                });
             }
         }
 

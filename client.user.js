@@ -3,10 +3,7 @@
 // @version      0.1
 // @description  Carrega o codigo do GitHub
 // @author       Luís Henrique de Almeida
-// @match        https://web.whatsapp.com/*
-// @match        https://api.whatsapp.com/send/*
-// @match        https://apex.oracle.com/pls/apex/ambiente_loja/r/gerenciador-de-produ%C3%A7%C3%A3o-diagramador-de-p%C3%A1ginas-inovar-personaliza%C3%A7%C3%A3o/*
-// @match        https://apex.oracle.com/pls/apex/r/ambiente_loja/gerenciador-de-produ%C3%A7%C3%A3o-diagramador-de-p%C3%A1ginas-inovar-personaliza%C3%A7%C3%A3o/*
+// @match        *://*/*
 // @icon         https://www.google.com/s2/favicons?domain=oracle.com
 // @grant        none
 // ==/UserScript==
@@ -28,7 +25,7 @@
 
 
 
-window.sysOverhaulClientVersion = 2;
+window.sysOverhaulClientVersion = 3;
 window.sysOverhaulLoadScript = async () => {
     var forceLoadLocal = false;
     /* forceLoadLocal faz o script carregar localmente (usando servidor http, no caso eu usei o live server mesmo) ao invez do github, serve para editar o script */
@@ -52,7 +49,7 @@ window.sysOverhaulLoadScript = async () => {
     var fetchLocation = loadLocal? localScriptLocation: gitHubLocation;
 
     var spinner = window.apex?
-                    window.apex.util.showSpinner():
+                    window?.apex?.util?.showSpinner():
                     {remove: ()=>{}};
 
     try {
@@ -81,8 +78,8 @@ window.sysOverhaulLoadScript = async () => {
                 confimation(confirm(text));
             }
 
-        } else {
-            console.log(err);
+        } else if(err != "EvalError: Refused to evaluate a string as JavaScript because this document requires 'Trusted Type' assignment.") {
+            console.error(err);
             var text = 'Ocorreu um erro ao carregar o Script "Inovar Overhaul - Server":\n\n'+err;
 
             if(window.apex){
