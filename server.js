@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Inovar Overhaul - Server
 // @version      0.1
-// @description  Numero selesionável no Whatsap, erevisão do sistema Inovar
+// @description  Numero selesionável no Whatsapp, erevisão do sistema Inovar
 // @author       Luís Henrique de Almeida
 // @match        https://web.whatsapp.com/*
 // @match        https://api.whatsapp.com/send/*
@@ -443,7 +443,8 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
                     <hr>
 
                     <h4><span style="color: grey">Utils:</span><br>
-                    Abrir link de impressão em nova aba sem dar foco à página<br>
+                    Abrir links de impressão e Whatsapp juntos<br>
+                    <i>(ao clicar no link de impressão)</i></h4>
                     <p class="clickableButton" onclick="window.setPrintDriveClick(this)">${window.config_sysOverhaulPrintDriveClick? "✔": "✖"}</p>
                     <hr>
 
