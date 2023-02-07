@@ -477,7 +477,7 @@ if(!document.location.href.includes("whatsapp") && window.location == window.par
                     <hr>
 
                     <h4><span style="color: blue">Debug:</span><br>
-                    Live Reload do script<br>
+                    Script Live Reload<br>
                     <i>(ao carregar script localmente)</i></h4>
                     <p class="clickableButton ${!window.config_sysOverhaulSavedData? " nointeraction": ""}"
                        title='"Debug: Carregar Script localmente" precisa estar ativado.'
