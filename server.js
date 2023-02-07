@@ -489,7 +489,7 @@ if(runningLocationIs("sistema")){
                     Atualizar Cliente<br>
                     <i>(ao atualizar é nescessário reiniciar o sistema)</i></h4>
                     <p class="clickableButton" onclick="window.open('https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/main/client.user.js')">
-                        <img class="insertHtmlIcon" src="https://cdn-icons-png.flaticon.com/512/45/45162.png">
+                        <img class="insertHtmlIcon" style="width: 15px" src="https://cdn-icons-png.flaticon.com/512/45/45162.png">
                     </p>
                     <hr>
 
