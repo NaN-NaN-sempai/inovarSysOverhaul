@@ -20,7 +20,7 @@
 */
 
 
-window.sysOverhaulClientWantedVersion = 3;
+window.sysOverhaulClientWantedVersion = 4;
 // ^^ Versão desejada do Client, para checar se existem atualizações do cliente
 
 
@@ -627,6 +627,22 @@ customInterval(() => {
                 .forEach(e=>{
                         var goToWhatsappQuestion = (!window.config_ReplaceWhatsapp2? "web": "api");
 
+                        var link_orderInfoName = window.getTextFromCollumn(e.parentNode.parentNode, "Cliente");
+                        var link_orderInfoNumber = window.getTextFromCollumn(e.parentNode.parentNode, "Whatsapp");
+
+                        var link_orderInfoNameAndNumber = link_orderInfoName + " - " + link_orderInfoNumber;
+
+                        var link_orderInfoOrders = decodeURI(e.href?.split("text=")[1])?.split(":")[1]?.split("Caso tenha incluído")[0]?.slice(3)?.replaceAll("\n", "<br>");
+                        
+                        if(!decodeURI(e.href).includes(link_orderInfoName)){
+                            var hour = new Date().getHours();
+                            var dayTime = hour >= 5 && hour < 12? "Bom dia":
+                                          hour >= 12 && hour < 18? "Boa tarde":
+                                          hour >= 18 && hour < 5? "Boa noite": "";
+
+                            e.href = encodeURI(decodeURI(e.href).replace("Olá,", dayTime + ", " + link_orderInfoName + "!\n"));
+                        }
+
                         // trocar nome no link
                         e.href = e.href.replace(/(?<=chamo%20).*(?=,%20fa%)/gm, window.user_UseCustomUsername? localStorage.user_UseCustomUsername_Name: apex.env.APP_USER);
 
@@ -645,8 +661,8 @@ customInterval(() => {
 
                         e.addEventListener("contextmenu", (evt) => {
                             evt.preventDefault();
-                            window.orderDataHolder = "<h4 class='selectableText'>"+window.getTextFromCollumn(e.parentNode.parentNode, "Cliente") + " - " + window.getTextFromCollumn(e.parentNode.parentNode, "Whatsapp") + "</h4>";
-                            window.orderDataHolder += decodeURI(e.href.split("text=")[1]).split(":")[1].split("Caso tenha incluído")[0].slice(3).replaceAll("\n", "<br>");
+                            window.orderDataHolder = "<h4 class='selectableText'>" + link_orderInfoNameAndNumber + "</h4>";
+                            window.orderDataHolder += link_orderInfoOrders;
                             //window.orderDataHolder += '<iframe src="' + window.getIframeLink(window.getValueFromIndex(e.parentNode.parentNode, 3)) + '" width="100%" height="100%" style="min-width: 95%; width=100%; height:100%;" scrolling="auto"></iframe>';
                             window.openContentInDisplay("Dados do pedido", true);
                         });

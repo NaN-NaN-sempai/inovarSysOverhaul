@@ -25,8 +25,10 @@
 
 
 
-window.sysOverhaulClientVersion = 3;
+window.sysOverhaulClientVersion = 4;
 window.sysOverhaulLoadScript = async () => {
+    if(location.href == "chrome://new-tab-page/") return;
+
     var forceLoadLocal = false;
     /* forceLoadLocal faz o script carregar localmente (usando servidor http, no caso eu usei o live server mesmo) ao invez do github, serve para editar o script */
 
