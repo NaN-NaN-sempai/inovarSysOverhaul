@@ -20,7 +20,7 @@
 */
 
 
-window.sysOverhaulClientWantedVersion = 4;
+window.sysOverhaulClientWantedVersion = 5;
 // ^^ Versão desejada do Client, para checar se existem atualizações do cliente
 
 

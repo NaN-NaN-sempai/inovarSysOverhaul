@@ -25,7 +25,7 @@
 
 
 
-window.sysOverhaulClientVersion = 4;
+window.sysOverhaulClientVersion = 5;
 window.sysOverhaulLoadScript = async () => {
     if(location.href == "chrome://new-tab-page/") return;
 
@@ -64,6 +64,8 @@ window.sysOverhaulLoadScript = async () => {
     } catch (err) {
         spinner.remove();
 
+        console.log(err)
+
         if(err == "TypeError: Failed to fetch" && loadLocal){
             let text = 'Ocorreu um erro ao carregar o Script "Inovar Overhaul - Server" localmente.\n\nDeseja voltar a carregar do GitHub?';
 
@@ -80,8 +82,9 @@ window.sysOverhaulLoadScript = async () => {
                 confimation(confirm(text));
             }
 
-        } else if(err != "EvalError: Refused to evaluate a string as JavaScript because this document requires 'Trusted Type' assignment.") {
+        } else if(err.includes("Refused to evaluate a string as JavaScript because 'unsafe-eval'")) {
             console.error(err);
+        } else {
             var text = 'Ocorreu um erro ao carregar o Script "Inovar Overhaul - Server":\n\n'+err;
 
             if(window.apex){
