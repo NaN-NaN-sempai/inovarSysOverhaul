@@ -1417,7 +1417,7 @@ customInterval(() => {
                 });
                 document.querySelector("#sysOverhaulUrlBarSim input").addEventListener("keyup", e=>{
                     if(e.key == "Enter"){
-                        document.location = urlBar.value;
+                        document.location = document.querySelector("#sysOverhaulUrlBarSim input").value;
                     }
                 });
             }
