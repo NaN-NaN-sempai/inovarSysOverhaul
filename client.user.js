@@ -36,7 +36,7 @@ window.sysOverhaulLoadScript = async () => {
         gitHubLocation se for carregar do GitHub
     */
     var localScriptLocation = "http://localhost:5500/server.js";
-    var gitHubLocation = "https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/main/server.js";
+    var gitHubLocation = "https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/master/server.js";
 
     var savedLoadLocal;
     if(localStorage.config_sysOverhaulSavedData == undefined){
