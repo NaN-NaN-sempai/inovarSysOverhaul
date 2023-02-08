@@ -66,7 +66,7 @@ if(window.sysOverhaulClientWantedVersion != window.sysOverhaulClientVersion) {
     var text = 'Existe uma nova versão do "Inovar Overhaul - Client"\n\nFicar com uma versão desatualizada pode causar erros.\n\nVersão atual: '+window.sysOverhaulClientVersion+'\nVersão disponível: '+window.sysOverhaulClientWantedVersion+'\n\nDeseja atualizar?\nSerá nescessário reiniciar a página do sistema.';
 
     var callBack = (c) => {
-        if(c) window.open('https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/main/client.user.js');
+        if(c) window.open('https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/master/client.user.js');
     }
 
     confirm(text, callBack);
@@ -484,7 +484,7 @@ if(runningLocationIs("sistema")){
                     <h4><span style="color: #bbbbbb">Client:</span><br>
                     Atualizar Cliente<br>
                     <i>(ao atualizar é nescessário reiniciar o sistema)</i></h4>
-                    <p class="clickableButton" onclick="window.open('https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/main/client.user.js')">
+                    <p class="clickableButton" onclick="window.open('https://raw.githubusercontent.com/NaN-NaN-sempai/inovarSysOverhaul/master/client.user.js')">
                         <img class="insertHtmlIcon" style="width: 15px" src="https://cdn-icons-png.flaticon.com/512/45/45162.png">
                     </p>
                     <hr>
