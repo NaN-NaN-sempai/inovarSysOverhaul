@@ -3,7 +3,10 @@
 // @version      0.1
 // @description  Codigo vindo do GitHub
 // @author       Luís Henrique de Almeida
-// @match        *://*/*
+// @match        https://web.whatsapp.com/*
+// @match        https://api.whatsapp.com/send/*
+// @match        https://apex.oracle.com/pls/apex/ambiente_loja/r/gerenciador-de-produ%C3%A7%C3%A3o-diagramador-de-p%C3%A1ginas-inovar-personaliza%C3%A7%C3%A3o/*
+// @match        https://apex.oracle.com/pls/apex/r/ambiente_loja/gerenciador-de-produ%C3%A7%C3%A3o-diagramador-de-p%C3%A1ginas-inovar-personaliza%C3%A7%C3%A3o/*
 // @icon         https://www.google.com/s2/favicons?domain=oracle.com
 // @grant        none
 // ==/UserScript==
@@ -20,7 +23,7 @@
 */
 
 
-window.sysOverhaulClientWantedVersion = 5;
+window.sysOverhaulClientWantedVersion = 6;
 // ^^ Versão desejada do Client, para checar se existem atualizações do cliente
 
 
@@ -1319,123 +1322,6 @@ customInterval(() => {
                     }
                 }
 
-            }
-        } else if(window.location != window.parent.location) {
-            if(placeHtmlUrl){
-                placeHtmlUrl = false;
-
-                var div = document.createElement("div");
-                    div.id = "sysOverhaulUrlBarSim";
-                    div.className = "hide";
-
-                    div.innerHTML = /* html */ `
-                        <style>
-                            #sysOverhaulUrlBarSim {
-                                position: fixed;
-                                z-index: 999999999999999999;
-                                top: 0;
-                                width: 100%;
-                                height: 42px;
-                                background: black;
-                                transition: top .5s;
-                            }
-                            #sysOverhaulUrlBarSim.hide {
-                                top: -42px;
-                            }
-                            #sysOverhaulUrlBarSim input {
-                                width: 100%;
-                            }
-                            
-                            #sysOverhaulUrlBarSim .contentDisplayHistoryButtons {
-                                display: flex;
-                                background: black;
-                                color: white;
-                                flex-direction: row;
-                                flex-wrap: nowrap;
-                                align-content: stretch;
-                                align-items: flex-start;
-                                justify-content: flex-start;
-                                position: relative;
-                                top: -10px;
-                                background: transparent !important;
-                            }
-                            
-                            #sysOverhaulUrlBarSim .contentDisplayHistoryButtons .clickableButton {
-                                width: 30px;
-                                border-radius: 0;
-                                text-align: center;
-                                outline: 1px black solid;
-                                border: 0;
-                                cursor: pointer;
-                                user-select: none;
-                            }
-                            #sysOverhaulUrlBarSim .contentDisplayHistoryButtons .clickableButton:nth-child(1) {
-                                border-radius: 50px 0 0 50px;
-                            }
-                            #sysOverhaulUrlBarSim .contentDisplayHistoryButtons .clickableButton:nth-child(2) {
-                                border-radius: 0 50px 50px 0;
-                            }
-                            #sysOverhaulUrlBarSim .contentDisplayHistoryButtons .clickableButton:nth-child(3) {
-                                border-radius: 50px;
-                                width: 20px;
-                            }
-                            #sysOverhaulUrlBarSim .clickableButton {
-                                background: white;
-                                color: black;
-                                width: 70px;
-                                border-radius: 10px;
-                                text-align: center;
-                                border: 1px black solid;
-                                cursor: pointer;
-                                user-select: none;
-                            }
-                            #sysOverhaulUrlBarSim .clickableButton:hover {
-                                outline: 4px #76768a solid;
-                                outline-offset: -2px;
-                            }
-                            #sysOverhaulUrlBarSim .insertHtmlIcon {
-                                height: 13px;
-                            }
-                            #sysOverhaulUrlBarSim .showUrlBarSim {
-                                opacity: .5;
-                                position: absolute;
-                                left: 50%;
-                                width: 30px;
-                                transform: translateX(-50%) rotate(180deg);
-                                bottom: -35px;
-                            }
-                            #sysOverhaulUrlBarSim .showUrlBarSim:hover {
-                                opacity: 1;
-                            }
-                            #sysOverhaulUrlBarSim .showUrlBarSim.hide {
-                                transform:  translateX(-50%);
-                            }
-                        </style>
-                        <div>
-                            <input type="text" value="${document.location}">
-                            <div class="contentDisplayHistoryButtons">
-                                <p class="clickableButton" onclick="history.back()">←</p>
-                                <p class="clickableButton" onclick="history.forward()">→</p>
-                                <p class="clickableButton" onclick="location.reload(true)">
-                                    <img class="insertHtmlIcon" src="https://cdn-icons-png.flaticon.com/512/126/126502.png">
-                                </p>
-                            </div>
-                            <p class="clickableButton showUrlBarSim hide" id="showUrlBarSimButton">↓</p>
-                        </div>
-                    `;
-
-                document.body.append(div);
-
-                document.querySelector("#showUrlBarSimButton").addEventListener("click", e => {
-                    document.querySelector("#showUrlBarSimButton").classList.toggle("hide");
-                    document.querySelector("#sysOverhaulUrlBarSim").classList.toggle("hide");
-                    
-                });
-                document.querySelector("#sysOverhaulUrlBarSim input").addEventListener("keyup", e=>{
-                    if(e.key == "Enter"){
-                        document.location = document.querySelector("#sysOverhaulUrlBarSim input").value;
-                    }
-                });
             }
         }
 

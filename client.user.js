@@ -3,7 +3,10 @@
 // @version      0.1
 // @description  Carrega o codigo do GitHub
 // @author       Luís Henrique de Almeida
-// @match        *://*/*
+// @match        https://web.whatsapp.com/*
+// @match        https://api.whatsapp.com/send/*
+// @match        https://apex.oracle.com/pls/apex/ambiente_loja/r/gerenciador-de-produ%C3%A7%C3%A3o-diagramador-de-p%C3%A1ginas-inovar-personaliza%C3%A7%C3%A3o/*
+// @match        https://apex.oracle.com/pls/apex/r/ambiente_loja/gerenciador-de-produ%C3%A7%C3%A3o-diagramador-de-p%C3%A1ginas-inovar-personaliza%C3%A7%C3%A3o/*
 // @icon         https://www.google.com/s2/favicons?domain=oracle.com
 // @grant        none
 // ==/UserScript==
@@ -25,7 +28,7 @@
 
 
 
-window.sysOverhaulClientVersion = 5;
+window.sysOverhaulClientVersion = 6;
 window.sysOverhaulLoadScript = async () => {
     if(location.href == "chrome://new-tab-page/") return;
 
