@@ -626,10 +626,8 @@ customInterval(() => {
 
             // trocar link do whatsapp
             Array.from(document.querySelectorAll(".a-GV-row.is-readonly a"))
-                .filter(e=>e.href.includes("whatsapp"))
-                .forEach(e=>{
-                        var goToWhatsappQuestion = (!window.config_ReplaceWhatsapp2? "web": "api");
-
+                .filter(e => e.href.includes("whatsapp"))
+                .forEach(e => {
                         var link_orderInfoName = window.getTextFromCollumn(e.parentNode.parentNode, "Cliente");
                         var link_orderInfoNumber = window.getTextFromCollumn(e.parentNode.parentNode, "Whatsapp");
 
@@ -637,19 +635,23 @@ customInterval(() => {
 
                         var link_orderInfoOrders = decodeURI(e.href?.split("text=")[1])?.split(":")[1]?.split("Caso tenha incluído")[0]?.slice(3)?.replaceAll("\n", "<br>");
                         
+                        // inserir nome do cliente na mensagem
                         if(!decodeURI(e.href).includes(link_orderInfoName)){
                             var hour = new Date().getHours();
                             var dayTime = hour >= 5 && hour < 12? "Bom dia":
                                           hour >= 12 && hour < 18? "Boa tarde":
                                           hour >= 18 && hour < 5? "Boa noite": "";
 
-                            e.href = encodeURI(decodeURI(e.href).replace("Olá,", dayTime + ", " + link_orderInfoName + "!\n"));
+                            e.href = encodeURI(decodeURI(e.href).replace("Olá,", dayTime + ", *" + link_orderInfoName + "*!\n"));
                         }
 
                         // trocar nome no link
-                        e.href = e.href.replace(/(?<=chamo%20).*(?=,%20fa%)/gm, window.user_UseCustomUsername? localStorage.user_UseCustomUsername_Name: apex.env.APP_USER);
+                        e.href = e.href.replace(/(?<=chamo%20).*(?=,%20fa%)/gm, "*" + (window.user_UseCustomUsername? localStorage.user_UseCustomUsername_Name: apex.env.APP_USER) + "*");
+
 
                         // link whatsapp
+                        var goToWhatsappQuestion = (!window.config_ReplaceWhatsapp2? "web": "api");
+                        
                         e.href = window.config_ReplaceWhatsapp?
                             (e.href.includes("whatsapp://")?
                                  e.href:
@@ -658,7 +660,9 @@ customInterval(() => {
                                  e.href.replace("whatsapp://", "https://"+goToWhatsappQuestion+".whatsapp.com/"):
                                  e.href.replace("//"+goToWhatsappQuestion, !window.config_ReplaceWhatsapp2? "//api": "//web"));
 
-                        if(e.classList.contains("addedContextMenuEvent")) return
+
+                        // mostrar informações do pedido ao pressionar o botão direito (menu de contexto)
+                        if(e.classList.contains("addedContextMenuEvent")) return;
 
                         e.classList.add("addedContextMenuEvent");
 
@@ -666,11 +670,11 @@ customInterval(() => {
                             evt.preventDefault();
                             window.orderDataHolder = "<h4 class='selectableText'>" + link_orderInfoNameAndNumber + "</h4>";
                             window.orderDataHolder += link_orderInfoOrders;
-                            //window.orderDataHolder += '<iframe src="' + window.getIframeLink(window.getValueFromIndex(e.parentNode.parentNode, 3)) + '" width="100%" height="100%" style="min-width: 95%; width=100%; height:100%;" scrolling="auto"></iframe>';
                             window.openContentInDisplay("Dados do pedido", true);
                         });
                 });
 
+            
             /*
                 if: Main System
                 else: Pedido - iframe
