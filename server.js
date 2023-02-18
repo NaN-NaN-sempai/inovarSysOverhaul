@@ -639,8 +639,7 @@ customInterval(() => {
                         if(!decodeURI(e.href).includes(link_orderInfoName)){
                             var hour = new Date().getHours();
                             var dayTime = hour >= 5 && hour < 12? "Bom dia":
-                                          hour >= 12 && hour < 18? "Boa tarde":
-                                          hour >= 18 && hour < 5? "Boa noite": "";
+                                          hour >= 12 && hour < 18? "Boa tarde": "Boa noite"
 
                             e.href = encodeURI(decodeURI(e.href).replace("Olá,", dayTime + ", *" + link_orderInfoName + "*!\n"));
                         }
